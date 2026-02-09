@@ -162,15 +162,8 @@ const Transactions = () => {
             Word Report
           </button>
           <button 
-            className="btn"
+            className="btn btn-excel"
             onClick={handleExportTransactionExcel}
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '5px',
-              backgroundColor: '#217346',
-              color: 'white'
-            }}
           >
             <MdTableChart size={18} />
             Excel Export

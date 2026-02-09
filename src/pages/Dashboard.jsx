@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { itemsAPI, categoriesAPI, transactionsAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import Toast from '../components/Toast';
 
 const Dashboard = () => {
+  const { user, isAdmin } = useAuth();
   const [stats, setStats] = useState({
     totalItems: 0,
     totalCategories: 0,
@@ -68,10 +70,29 @@ const Dashboard = () => {
     });
   };
 
+  const getGreeting = () => {
+    const hour = currentDateTime.getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 18) return 'Good Afternoon';
+    return 'Good Evening';
+  };
+
+  const displayName = user?.name || user?.username || 'User';
+
+  const getSubtitle = () => {
+    if (isAdmin) {
+      return 'Manage your inventory, track items, and oversee all operations';
+    }
+    return 'Browse items, place requests, and track your orders';
+  };
+
   return (
     <div className="container">
-      <div className="dashboard-header">
-        <h2>Dashboard</h2>
+      <div className="dashboard-welcome-card">
+        <div className="welcome-content">
+          <h1 className="welcome-greeting">{getGreeting()}, {displayName}!</h1>
+          <p className="welcome-subtitle">{getSubtitle()}</p>
+        </div>
         <div className="datetime-display">
           <div className="date-part">{formatDate()}</div>
           <div className="time-part">{formatTime()}</div>

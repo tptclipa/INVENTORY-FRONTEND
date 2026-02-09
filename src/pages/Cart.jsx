@@ -94,16 +94,10 @@ const Cart = () => {
         <div className="page-header">
           <h2>Shopping Cart</h2>
         </div>
-        <div style={{ 
-          textAlign: 'center', 
-          padding: '60px 20px',
-          background: 'white',
-          borderRadius: '10px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}>
-          <MdShoppingCart size={80} color="#ccc" style={{ marginBottom: '20px' }} />
-          <h3 style={{ color: '#666', marginBottom: '10px' }}>Your cart is empty</h3>
-          <p style={{ color: '#999', marginBottom: '20px' }}>Add items from the inventory to get started</p>
+        <div className="empty-cart-message">
+          <MdShoppingCart size={80} className="empty-cart-icon" />
+          <h3>Your cart is empty</h3>
+          <p>Add items from the inventory to get started</p>
           <button 
             className="btn btn-primary" 
             onClick={() => navigate('/dashboard')}

@@ -1,12 +1,14 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useTheme } from '../context/ThemeContext';
 import { LiaCopyright } from 'react-icons/lia';
-import { MdDashboard, MdInventory, MdCategory, MdSwapHoriz, MdLogout, MdAssignment, MdShoppingCart } from 'react-icons/md';
+import { MdDashboard, MdInventory, MdCategory, MdSwapHoriz, MdLogout, MdAssignment, MdShoppingCart, MdDarkMode, MdLightMode } from 'react-icons/md';
 
 const Layout = ({ children }) => {
   const { user, logout, isAdmin } = useAuth();
   const { getCartTotal } = useCart();
+  const { isDarkMode, toggleTheme } = useTheme();
   const location = useLocation();
 
   const isActive = (path) => location.pathname === path;
@@ -17,11 +19,12 @@ const Layout = ({ children }) => {
       {/* Side Navigation */}
       <aside className="sidebar">
         <div className="sidebar-header">
-          <h1 className="sidebar-brand">Inventory System</h1>
-          <div className="user-info-sidebar">
-            <span className="user-first-name">{user?.name?.split(' ')[0] || user?.username}</span>
-            <span className="user-last-name">{user?.name?.split(' ').slice(1).join(' ') || ''}</span>
-          </div>
+          <img 
+            src="/Untitled design (2).png" 
+            alt="TESDA Logo" 
+            className="sidebar-logo"
+          />
+          <h1 className="sidebar-brand">INVENTORY</h1>
         </div>
 
         <nav className="sidebar-nav">
@@ -61,6 +64,10 @@ const Layout = ({ children }) => {
         </nav>
 
         <div className="sidebar-footer">
+          <button onClick={toggleTheme} className="sidebar-theme-btn">
+            {isDarkMode ? <MdLightMode size={20} /> : <MdDarkMode size={20} />}
+            <span>{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
+          </button>
           <button onClick={logout} className="sidebar-logout-btn">
             <MdLogout size={20} />
             <span>Logout</span>

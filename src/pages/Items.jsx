@@ -303,140 +303,50 @@ const Items = () => {
                   Generate Reports
                 </button>
                 {showReportMenu && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '100%',
-                    right: 0,
-                    marginTop: '5px',
-                    backgroundColor: 'white',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                    zIndex: 1000,
-                    minWidth: '240px'
-                  }}>
+                  <div className="dropdown-menu">
                     {/* Word Documents Section */}
-                    <div style={{ 
-                      padding: '8px 15px', 
-                      backgroundColor: '#f8f9fa', 
-                      fontWeight: 'bold', 
-                      fontSize: '12px',
-                      color: '#666'
-                    }}>
+                    <div className="dropdown-menu-header">
                       Word Documents (.docx)
                     </div>
                     <button
                       onClick={handleGenerateInventoryReport}
-                      style={{
-                        width: '100%',
-                        padding: '10px 15px',
-                        border: 'none',
-                        background: 'none',
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
-                      }}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = '#f5f5f5'}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                      className="dropdown-menu-item"
                     >
                       <MdFileDownload size={18} />
                       Inventory Report (Word)
                     </button>
                     <button
                       onClick={handleGenerateLowStockAlert}
-                      style={{
-                        width: '100%',
-                        padding: '10px 15px',
-                        border: 'none',
-                        background: 'none',
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
-                      }}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = '#f5f5f5'}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                      className="dropdown-menu-item"
                     >
                       <MdFileDownload size={18} />
                       Low Stock Alert (Word)
                     </button>
                     
                     {/* Divider */}
-                    <div style={{ 
-                      height: '1px', 
-                      backgroundColor: '#ddd', 
-                      margin: '5px 0' 
-                    }} />
+                    <div className="dropdown-menu-divider" />
                     
                     {/* Excel Section */}
-                    <div style={{ 
-                      padding: '8px 15px', 
-                      backgroundColor: '#f8f9fa', 
-                      fontWeight: 'bold', 
-                      fontSize: '12px',
-                      color: '#666'
-                    }}>
+                    <div className="dropdown-menu-header">
                       Excel Spreadsheets (.xlsx)
                     </div>
                     <button
                       onClick={handleExportInventoryExcel}
-                      style={{
-                        width: '100%',
-                        padding: '10px 15px',
-                        border: 'none',
-                        background: 'none',
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        color: '#217346'
-                      }}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = '#f5f5f5'}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                      className="dropdown-menu-item excel-item"
                     >
                       <MdTableChart size={18} />
                       Inventory Report (Excel)
                     </button>
                     <button
                       onClick={handleExportLowStockExcel}
-                      style={{
-                        width: '100%',
-                        padding: '10px 15px',
-                        border: 'none',
-                        background: 'none',
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        color: '#217346'
-                      }}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = '#f5f5f5'}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                      className="dropdown-menu-item excel-item"
                     >
                       <MdTableChart size={18} />
                       Low Stock Alert (Excel)
                     </button>
                     <button
                       onClick={handleExportFullData}
-                      style={{
-                        width: '100%',
-                        padding: '10px 15px',
-                        border: 'none',
-                        background: 'none',
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        color: '#217346'
-                      }}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = '#f5f5f5'}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                      className="dropdown-menu-item excel-item"
                     >
                       <MdTableChart size={18} />
                       Full Data Export (Excel)
@@ -497,7 +407,7 @@ const Items = () => {
               items.map((item) => {
                 const isLowStock = item.quantity <= item.minStockLevel;
                 return (
-                  <tr key={item._id} style={isLowStock ? { backgroundColor: '#fff3cd' } : {}}>
+                  <tr key={item._id} className={isLowStock ? 'low-stock-row' : ''}>
                     <td>{item.name}</td>
                     <td>{item.sku || 'N/A'}</td>
                     <td>{item.category.name}</td>
@@ -513,10 +423,9 @@ const Items = () => {
                             Edit
                           </button>
                           <button 
-                            className="btn btn-icon" 
+                            className="btn btn-success btn-icon" 
                             onClick={() => handleGenerateItemLabel(item._id)}
                             title="Generate Label"
-                            style={{ backgroundColor: '#28a745', color: 'white' }}
                           >
                             <MdPrint size={18} />
                           </button>

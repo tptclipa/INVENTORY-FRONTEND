@@ -176,7 +176,7 @@ const Requests = () => {
             Download RIS Set ({selectedForBatch.length}/2 selected)
           </button>
           {selectedForBatch.length < 2 && (
-            <span style={{ color: '#6c757d', fontSize: '0.9em' }}>
+            <span className="text-muted" style={{ fontSize: '0.9em' }}>
               Select 2 approved requests to generate batch RIS
             </span>
           )}
@@ -347,20 +347,18 @@ const Requests = () => {
 
           <div className="cart-items-list" style={{ marginBottom: '20px' }}>
             {selectedRequest.items && selectedRequest.items.map((reqItem, idx) => (
-              <div key={idx} style={{ 
+              <div key={idx} className="request-item-detail" style={{ 
                 padding: '15px', 
-                border: '1px solid #dee2e6', 
                 borderRadius: '8px', 
-                marginBottom: '10px',
-                background: '#f8f9fa'
+                marginBottom: '10px'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ flex: 1 }}>
                     <h4 style={{ margin: '0 0 5px 0' }}>{reqItem.item?.name || 'N/A'}</h4>
-                    <p style={{ margin: '3px 0', color: '#6c757d' }}>
+                    <p className="text-muted" style={{ margin: '3px 0' }}>
                       SKU: {reqItem.item?.sku || 'N/A'}
                     </p>
-                    <p style={{ margin: '3px 0', color: '#6c757d' }}>
+                    <p className="text-muted" style={{ margin: '3px 0' }}>
                       Quantity: {reqItem.quantity || 0} {reqItem.unit || 'pcs'}
                     </p>
                     {reqItem.status === 'approved' && (
@@ -370,7 +368,7 @@ const Requests = () => {
                       <div>
                         <span className="badge badge-neutral" style={{ marginTop: '5px' }}>✗ Rejected</span>
                         {reqItem.rejectionReason && (
-                          <p style={{ margin: '5px 0 0 0', fontSize: '0.85em', color: '#6c757d' }}>
+                          <p className="text-muted" style={{ margin: '5px 0 0 0', fontSize: '0.85em' }}>
                             Reason: {reqItem.rejectionReason}
                           </p>
                         )}
