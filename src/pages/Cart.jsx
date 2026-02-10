@@ -94,7 +94,7 @@ const Cart = () => {
     return (
       <div className="container">
         <div className="page-header">
-          <h2>Shopping Cart</h2>
+          <h2>Item Cart</h2>
         </div>
         <div className="empty-cart-message">
           <MdShoppingCart size={80} className="empty-cart-icon" />
@@ -114,7 +114,7 @@ const Cart = () => {
   return (
     <div className="container">
       <div className="page-header">
-        <h2>Shopping Cart ({getCartTotal()} items)</h2>
+        <h2>Item Cart ({getCartTotal()} items)</h2>
         <button 
           className="btn btn-secondary" 
           onClick={clearCart}

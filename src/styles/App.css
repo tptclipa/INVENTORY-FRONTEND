@@ -956,7 +956,8 @@ body {
 
 .data-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: collapse !important;
+  border-spacing: 0;
 }
 
 .data-table thead {
@@ -972,6 +973,8 @@ body {
   text-align: left;
   border-bottom: 1px solid var(--border-color);
   color: var(--text-primary);
+  vertical-align: middle;
+  box-sizing: border-box;
   transition: all 0.3s ease;
 }
 
@@ -981,6 +984,27 @@ body {
   font-size: 11px;
   letter-spacing: 0.5px;
   color: var(--text-muted);
+}
+
+.data-table tbody tr {
+  height: 80px;
+}
+
+.data-table tbody tr td {
+  height: 80px !important;
+  min-height: 80px;
+  max-height: 80px;
+  box-sizing: border-box;
+  position: relative;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.data-table tbody tr td > div:not(.action-buttons) {
+  line-height: 1.5;
+}
+
+.data-table tbody tr td > div + div {
+  margin-top: 3px;
 }
 
 .data-table tbody tr:hover {
@@ -994,11 +1018,29 @@ body {
 .action-buttons {
   display: flex;
   gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
-.action-buttons button {
-  padding: 6px 12px;
+td.action-buttons {
+  padding: 10px 15px !important;
+  height: 80px !important;
+  min-height: 80px !important;
+  max-height: 80px !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  box-sizing: border-box !important;
+  vertical-align: middle !important;
+}
+
+.action-buttons button:not(.btn-icon) {
+  padding: 8px 12px;
   font-size: 12px;
+  height: 40px;
+  line-height: 1;
 }
 
 /* Modal Styles */
@@ -1341,6 +1383,8 @@ body {
 .text-muted {
   color: var(--text-muted);
   font-size: 0.875em;
+  line-height: 1.4;
+  margin-top: 2px;
   transition: color 0.3s ease;
 }
 
@@ -1389,8 +1433,9 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 12px;
-  min-width: auto;
+  padding: 8px;
+  min-width: 40px;
+  min-height: 40px;
   transition: all 0.3s ease;
 }
 

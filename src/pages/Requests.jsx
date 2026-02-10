@@ -3,13 +3,14 @@ import { requestsAPI, risAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/Modal';
 import Toast from '../components/Toast';
-import { MdDescription, MdExpandMore } from 'react-icons/md';
+import { MdDescription, MdMenu } from 'react-icons/md';
 
 const Requests = () => {
   const { isAdmin } = useAuth();
   const [requests, setRequests] = useState([]);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [isViewCartModalOpen, setIsViewCartModalOpen] = useState(false);
+  const [isQuantityModalOpen, setIsQuantityModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [toast, setToast] = useState(null);
   const [filters, setFilters] = useState({
@@ -17,7 +18,6 @@ const Requests = () => {
   });
   const [rejectionReason, setRejectionReason] = useState('');
   const [selectedForBatch, setSelectedForBatch] = useState([]);
-  const [expandedRequests, setExpandedRequests] = useState([]);
 
   useEffect(() => {
     loadRequests();
@@ -45,6 +45,11 @@ const Requests = () => {
   const handleViewCart = (request) => {
     setSelectedRequest(request);
     setIsViewCartModalOpen(true);
+  };
+
+  const handleViewQuantities = (request) => {
+    setSelectedRequest(request);
+    setIsQuantityModalOpen(true);
   };
 
   const handleApprove = async (id) => {
@@ -140,16 +145,6 @@ const Requests = () => {
     }
   };
 
-  const toggleExpandRequest = (requestId) => {
-    setExpandedRequests(prev => {
-      if (prev.includes(requestId)) {
-        return prev.filter(id => id !== requestId);
-      } else {
-        return [...prev, requestId];
-      }
-    });
-  };
-
   const getStatusBadge = (status) => {
     const statusClasses = {
       pending: 'badge badge-neutral',
@@ -208,7 +203,6 @@ const Requests = () => {
             <tr>
               {filters.status === 'approved' && <th style={{ width: '50px' }}>Select</th>}
               <th>Item</th>
-              <th>Quantity</th>
               <th>Purpose</th>
               {isAdmin && <th>Requested By</th>}
               <th>Date</th>
@@ -218,7 +212,7 @@ const Requests = () => {
           <tbody>
             {requests.length === 0 ? (
               <tr>
-                <td colSpan={filters.status === 'approved' ? (isAdmin ? "7" : "6") : (isAdmin ? "6" : "5")} className="text-center">
+                <td colSpan={filters.status === 'approved' ? (isAdmin ? "6" : "5") : (isAdmin ? "5" : "4")} className="text-center">
                   No requests found
                 </td>
               </tr>
@@ -236,27 +230,11 @@ const Requests = () => {
                   }
                 };
 
-                // Safe extraction of quantity
-                const getQuantity = () => {
-                  try {
-                    if (request.items && Array.isArray(request.items) && request.items.length > 0) {
-                      return 'Multiple';
-                    }
-                    if (request.quantity) {
-                      return `${request.quantity} ${request.unit || ''}`;
-                    }
-                    return 'N/A';
-                  } catch (e) {
-                    return 'N/A';
-                  }
-                };
-
                 const hasMultipleItems = request.items && Array.isArray(request.items) && request.items.length > 0;
-                const isExpanded = expandedRequests.includes(request._id);
 
                 return (
                   <>
-                    <tr key={request._id} style={{ cursor: hasMultipleItems ? 'pointer' : 'default' }}>
+                    <tr key={request._id}>
                       {filters.status === 'approved' && (
                         <td style={{ textAlign: 'center' }}>
                           <input
@@ -267,28 +245,16 @@ const Requests = () => {
                           />
                         </td>
                       )}
-                      <td 
-                        onClick={() => hasMultipleItems && toggleExpandRequest(request._id)}
-                        style={{ cursor: hasMultipleItems ? 'pointer' : 'default' }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          {hasMultipleItems && (
-                            <MdExpandMore 
-                              size={20} 
-                              className={`expand-icon ${isExpanded ? 'expanded' : ''}`}
-                            />
-                          )}
-                          <div>
-                            <strong>{getItemName()}</strong>
-                            {request.item?.sku && <div className="text-muted">{request.item.sku}</div>}
-                          </div>
+                      <td>
+                        <div>
+                          <strong>{getItemName()}</strong>
+                          {request.item?.sku && <div className="text-muted">{request.item.sku}</div>}
                         </div>
                       </td>
-                      <td>{getQuantity()}</td>
                       <td>{request.purpose}</td>
                       {isAdmin && (
                         <td>
-                          <div>{request.requestedBy?.username || 'N/A'}</div>
+                          <div>{request.requestedByName || request.requestedBy?.name || 'N/A'}</div>
                           <div className="text-muted">{request.requestedBy?.email || ''}</div>
                         </td>
                       )}
@@ -297,12 +263,21 @@ const Requests = () => {
                         {isAdmin && request.status === 'pending' && (
                           <>
                             {request.items && Array.isArray(request.items) && request.items.length > 0 ? (
-                              <button
-                                className="btn btn-action-outline"
-                                onClick={() => handleViewCart(request)}
-                              >
-                                View Cart
-                              </button>
+                              <>
+                                <button
+                                  className="btn btn-action-outline"
+                                  onClick={() => handleViewCart(request)}
+                                >
+                                  View Cart
+                                </button>
+                                <button
+                                  className="btn btn-icon btn-action-outline"
+                                  onClick={() => handleViewQuantities(request)}
+                                  title="View Item Details"
+                                >
+                                  <MdMenu size={18} />
+                                </button>
+                              </>
                             ) : (
                               <>
                                 <button
@@ -322,87 +297,70 @@ const Requests = () => {
                           </>
                         )}
                         {request.status === 'approved' && (
-                          <button
-                            className="btn btn-icon btn-action-outline"
-                            onClick={() => handleGenerateRIS(request._id)}
-                            title="Download RIS Document"
-                          >
-                            <MdDescription size={18} />
-                          </button>
+                          <>
+                            <button
+                              className="btn btn-icon btn-action-outline"
+                              onClick={() => handleGenerateRIS(request._id)}
+                              title="Download RIS Document"
+                            >
+                              <MdDescription size={18} />
+                            </button>
+                            {hasMultipleItems && (
+                              <button
+                                className="btn btn-icon btn-action-outline"
+                                onClick={() => handleViewQuantities(request)}
+                                title="View Item Details"
+                              >
+                                <MdMenu size={18} />
+                              </button>
+                            )}
+                          </>
                         )}
                         {!isAdmin && request.status === 'pending' && (
-                          <button
-                            className="btn btn-action-outline"
-                            onClick={() => handleDelete(request._id)}
-                          >
-                            Cancel
-                          </button>
+                          <>
+                            <button
+                              className="btn btn-action-outline"
+                              onClick={() => handleDelete(request._id)}
+                            >
+                              Cancel
+                            </button>
+                            {hasMultipleItems && (
+                              <button
+                                className="btn btn-icon btn-action-outline"
+                                onClick={() => handleViewQuantities(request)}
+                                title="View Item Details"
+                              >
+                                <MdMenu size={18} />
+                              </button>
+                            )}
+                          </>
                         )}
                         {request.status === 'rejected' && request.rejectionReason && (
-                          <button
-                            className="btn btn-action-outline"
-                            onClick={() => {
-                              setToast({
-                                message: `Rejection reason: ${request.rejectionReason}`,
-                                type: 'info'
-                              });
-                            }}
-                          >
-                            View Reason
-                          </button>
+                          <>
+                            <button
+                              className="btn btn-action-outline"
+                              onClick={() => {
+                                setToast({
+                                  message: `Rejection reason: ${request.rejectionReason}`,
+                                  type: 'info'
+                                });
+                              }}
+                            >
+                              View Reason
+                            </button>
+                            {hasMultipleItems && (
+                              <button
+                                className="btn btn-icon btn-action-outline"
+                                onClick={() => handleViewQuantities(request)}
+                                title="View Item Details"
+                              >
+                                <MdMenu size={18} />
+                              </button>
+                            )}
+                          </>
                         )}
                       </td>
                     </tr>
-                    {/* Expanded items row */}
-                    {hasMultipleItems && isExpanded && (
-                      <tr key={`${request._id}-expanded`} className="expanded-row">
-                        <td colSpan={filters.status === 'approved' ? (isAdmin ? "7" : "6") : (isAdmin ? "6" : "5")} 
-                            style={{ padding: '0', backgroundColor: 'var(--bg-tertiary)' }}>
-                          <div className="expanded-content" style={{ padding: '15px 30px' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                              <thead>
-                                <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
-                                  <th style={{ textAlign: 'left', padding: '8px', fontSize: '0.9em', fontWeight: '600', color: 'var(--text-primary)' }}>Item Name</th>
-                                  <th style={{ textAlign: 'left', padding: '8px', fontSize: '0.9em', fontWeight: '600', color: 'var(--text-primary)' }}>SKU</th>
-                                  <th style={{ textAlign: 'left', padding: '8px', fontSize: '0.9em', fontWeight: '600', color: 'var(--text-primary)' }}>Quantity</th>
-                                  <th style={{ textAlign: 'left', padding: '8px', fontSize: '0.9em', fontWeight: '600', color: 'var(--text-primary)' }}>Status</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {request.items.map((reqItem, idx) => (
-                                  <tr key={idx} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                                    <td style={{ padding: '10px 8px', color: 'var(--text-primary)' }}>{reqItem.item?.name || 'N/A'}</td>
-                                    <td style={{ padding: '10px 8px' }} className="text-muted">{reqItem.item?.sku || 'N/A'}</td>
-                                    <td style={{ padding: '10px 8px', color: 'var(--text-primary)' }}>{reqItem.quantity || 0} {reqItem.unit || 'pcs'}</td>
-                                    <td style={{ padding: '10px 8px' }}>
-                                      {reqItem.status === 'approved' && (
-                                        <span className="badge badge-neutral">✓ Approved</span>
-                                      )}
-                                      {reqItem.status === 'rejected' && (
-                                        <div>
-                                          <span className="badge badge-neutral">✗ Rejected</span>
-                                          {reqItem.rejectionReason && (
-                                            <div className="text-muted" style={{ fontSize: '0.85em', marginTop: '4px' }}>
-                                              Reason: {reqItem.rejectionReason}
-                                            </div>
-                                          )}
-                                        </div>
-                                      )}
-                                      {reqItem.status === 'pending' && (
-                                        <span className="badge badge-neutral">Pending</span>
-                                      )}
-                                      {!reqItem.status && (
-                                        <span className="badge badge-neutral">{request.status.toUpperCase()}</span>
-                                      )}
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
                   </>
                 );
               })
@@ -420,7 +378,7 @@ const Requests = () => {
         >
           <div style={{ marginBottom: '20px' }}>
             <p><strong>Purpose:</strong> {selectedRequest.purpose}</p>
-            <p><strong>Requested by:</strong> {selectedRequest.requestedByName || selectedRequest.requestedBy?.username}</p>
+            <p><strong>Requested by:</strong> {selectedRequest.requestedByName || selectedRequest.requestedBy?.name}</p>
             {selectedRequest.notes && <p><strong>Notes:</strong> {selectedRequest.notes}</p>}
           </div>
 
@@ -546,6 +504,53 @@ const Requests = () => {
           </div>
         </form>
       </Modal>
+
+      {/* Quantity Details Modal */}
+      {selectedRequest && (
+        <Modal
+          isOpen={isQuantityModalOpen}
+          onClose={() => setIsQuantityModalOpen(false)}
+          title="Quantity Details"
+        >
+          <div style={{ marginBottom: '20px' }}>
+            <p><strong>Total Items:</strong> {selectedRequest.items?.length || 0}</p>
+            <p><strong>Date:</strong> {new Date(selectedRequest.createdAt).toLocaleDateString()}</p>
+          </div>
+
+          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead style={{ position: 'sticky', top: 0, backgroundColor: 'var(--bg-primary)', zIndex: 1 }}>
+                <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
+                  <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: '600' }}>Item Name</th>
+                  <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: '600' }}>SKU</th>
+                  <th style={{ textAlign: 'right', padding: '12px 8px', fontWeight: '600' }}>Quantity</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedRequest.items && selectedRequest.items.map((reqItem, idx) => (
+                  <tr key={idx} style={{ borderBottom: '1px solid var(--border-light)' }}>
+                    <td style={{ padding: '12px 8px', color: 'var(--text-primary)' }}>{reqItem.item?.name || 'N/A'}</td>
+                    <td style={{ padding: '12px 8px' }} className="text-muted">{reqItem.item?.sku || 'N/A'}</td>
+                    <td style={{ padding: '12px 8px', color: 'var(--text-primary)', textAlign: 'right' }}>
+                      <strong>{reqItem.quantity || 0}</strong> {reqItem.unit || 'pcs'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="form-actions" style={{ marginTop: '20px' }}>
+            <button 
+              type="button" 
+              className="btn btn-action-outline" 
+              onClick={() => setIsQuantityModalOpen(false)}
+            >
+              Close
+            </button>
+          </div>
+        </Modal>
+      )}
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>

@@ -289,7 +289,7 @@ const Items = () => {
   return (
     <div className="container">
       <div className="page-header">
-        <h2>{isAdmin ? 'Items Management' : 'View Stock'}</h2>
+        <h2>{isAdmin ? 'Items Management' : 'View Items'}</h2>
         <div style={{ display: 'flex', gap: '10px' }}>
           {isAdmin && (
             <>

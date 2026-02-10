@@ -34,7 +34,7 @@ const Layout = ({ children }) => {
           </Link>
           <Link to="/items" className={`sidebar-link ${isActive('/items') ? 'active' : ''}`}>
             <MdInventory size={20} />
-            <span>{isAdmin ? 'Items' : 'View Stock'}</span>
+            <span>{isAdmin ? 'Stocks' : 'View Items'}</span>
           </Link>
           {isAdmin && (
             <Link to="/categories" className={`sidebar-link ${isActive('/categories') ? 'active' : ''}`}>
