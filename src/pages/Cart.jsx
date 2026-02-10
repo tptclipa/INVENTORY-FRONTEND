@@ -13,6 +13,7 @@ const Cart = () => {
   const [formData, setFormData] = useState({
     purpose: '',
     notes: '',
+    budgetSource: 'MOOE', // Default to MOOE
     requestedByName: '',
     requestedByDesignation: '',
     receivedByName: '',
@@ -59,6 +60,7 @@ const Cart = () => {
         })),
         purpose: formData.purpose,
         notes: formData.notes,
+        budgetSource: formData.budgetSource,
         requestedByName: formData.requestedByName,
         requestedByDesignation: formData.requestedByDesignation,
         receivedByName: formData.receivedByName,
@@ -197,6 +199,20 @@ const Cart = () => {
 
               <div className="form-section-divider">
                 <h4>RIS Form Information</h4>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="budgetSource">Budget Source *</label>
+                <select
+                  id="budgetSource"
+                  name="budgetSource"
+                  value={formData.budgetSource}
+                  onChange={handleFormChange}
+                  required
+                >
+                  <option value="MOOE">MOOE</option>
+                  <option value="SSP">SSP</option>
+                </select>
               </div>
 
               <div className="form-group">

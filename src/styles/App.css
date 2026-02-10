@@ -1680,3 +1680,34 @@ body {
 .dark-mode .login-page .footer p {
   color: var(--primary-blue);
 }
+
+/* Expandable Row Animation */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.expanded-row td {
+  animation: slideDown 0.3s ease-out;
+}
+
+.expanded-row .expanded-content {
+  animation: slideDown 0.3s ease-out;
+}
+
+/* Expand icon animation */
+.expand-icon {
+  transition: transform 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.expand-icon.expanded {
+  transform: rotate(180deg);
+}

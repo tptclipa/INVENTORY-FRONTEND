@@ -3,7 +3,7 @@ import { requestsAPI, risAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/Modal';
 import Toast from '../components/Toast';
-import { MdDescription } from 'react-icons/md';
+import { MdDescription, MdExpandMore } from 'react-icons/md';
 
 const Requests = () => {
   const { isAdmin } = useAuth();
@@ -17,6 +17,7 @@ const Requests = () => {
   });
   const [rejectionReason, setRejectionReason] = useState('');
   const [selectedForBatch, setSelectedForBatch] = useState([]);
+  const [expandedRequests, setExpandedRequests] = useState([]);
 
   useEffect(() => {
     loadRequests();
@@ -116,23 +117,20 @@ const Requests = () => {
       if (prev.includes(requestId)) {
         return prev.filter(id => id !== requestId);
       } else {
-        if (prev.length >= 2) {
-          setToast({ message: 'You can only select 2 requests at a time', type: 'info' });
-          return prev;
-        }
         return [...prev, requestId];
       }
     });
   };
 
   const handleGenerateBatchRIS = async () => {
-    if (selectedForBatch.length !== 2) {
-      setToast({ message: 'Please select exactly 2 requests', type: 'error' });
+    if (selectedForBatch.length < 2) {
+      setToast({ message: 'Please select at least 2 requests', type: 'error' });
       return;
     }
 
     try {
-      setToast({ message: 'Generating batch RIS document...', type: 'info' });
+      const worksheetsNeeded = Math.ceil(selectedForBatch.length / 2);
+      setToast({ message: `Generating ${selectedForBatch.length} RIS in ${worksheetsNeeded} worksheet(s)...`, type: 'info' });
       const blob = await risAPI.generateRISBatch(selectedForBatch);
       downloadBlob(blob, `RIS-Batch-${Date.now()}.xlsx`);
       setToast({ message: 'Batch RIS generated successfully!', type: 'success' });
@@ -140,6 +138,16 @@ const Requests = () => {
     } catch (error) {
       setToast({ message: error.message || 'Error generating batch RIS', type: 'error' });
     }
+  };
+
+  const toggleExpandRequest = (requestId) => {
+    setExpandedRequests(prev => {
+      if (prev.includes(requestId)) {
+        return prev.filter(id => id !== requestId);
+      } else {
+        return [...prev, requestId];
+      }
+    });
   };
 
   const getStatusBadge = (status) => {
@@ -171,13 +179,18 @@ const Requests = () => {
           <button
             className="btn btn-action"
             onClick={handleGenerateBatchRIS}
-            disabled={selectedForBatch.length !== 2}
+            disabled={selectedForBatch.length < 2}
           >
-            Download RIS Set ({selectedForBatch.length}/2 selected)
+            Download RIS Set ({selectedForBatch.length} selected)
           </button>
           {selectedForBatch.length < 2 && (
             <span className="text-muted" style={{ fontSize: '0.9em' }}>
-              Select 2 approved requests to generate batch RIS
+              Select at least 2 approved requests to generate batch RIS
+            </span>
+          )}
+          {selectedForBatch.length >= 2 && (
+            <span className="text-muted" style={{ fontSize: '0.9em' }}>
+              Will create {Math.ceil(selectedForBatch.length / 2)} worksheet(s) - 2 RIS per sheet
             </span>
           )}
           <button
@@ -198,7 +211,6 @@ const Requests = () => {
               <th>Quantity</th>
               <th>Purpose</th>
               {isAdmin && <th>Requested By</th>}
-              <th>Status</th>
               <th>Date</th>
               <th>Actions</th>
             </tr>
@@ -206,7 +218,7 @@ const Requests = () => {
           <tbody>
             {requests.length === 0 ? (
               <tr>
-                <td colSpan={filters.status === 'approved' ? (isAdmin ? "8" : "7") : (isAdmin ? "7" : "6")} className="text-center">
+                <td colSpan={filters.status === 'approved' ? (isAdmin ? "7" : "6") : (isAdmin ? "6" : "5")} className="text-center">
                   No requests found
                 </td>
               </tr>
@@ -239,93 +251,160 @@ const Requests = () => {
                   }
                 };
 
+                const hasMultipleItems = request.items && Array.isArray(request.items) && request.items.length > 0;
+                const isExpanded = expandedRequests.includes(request._id);
+
                 return (
-                  <tr key={request._id}>
-                    {filters.status === 'approved' && (
-                      <td style={{ textAlign: 'center' }}>
-                        <input
-                          type="checkbox"
-                          checked={selectedForBatch.includes(request._id)}
-                          onChange={() => handleBatchCheckboxChange(request._id)}
-                          style={{ cursor: 'pointer', width: '18px', height: '18px' }}
-                        />
+                  <>
+                    <tr key={request._id} style={{ cursor: hasMultipleItems ? 'pointer' : 'default' }}>
+                      {filters.status === 'approved' && (
+                        <td style={{ textAlign: 'center' }}>
+                          <input
+                            type="checkbox"
+                            checked={selectedForBatch.includes(request._id)}
+                            onChange={() => handleBatchCheckboxChange(request._id)}
+                            style={{ cursor: 'pointer', width: '18px', height: '18px' }}
+                          />
+                        </td>
+                      )}
+                      <td 
+                        onClick={() => hasMultipleItems && toggleExpandRequest(request._id)}
+                        style={{ cursor: hasMultipleItems ? 'pointer' : 'default' }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {hasMultipleItems && (
+                            <MdExpandMore 
+                              size={20} 
+                              className={`expand-icon ${isExpanded ? 'expanded' : ''}`}
+                            />
+                          )}
+                          <div>
+                            <strong>{getItemName()}</strong>
+                            {request.item?.sku && <div className="text-muted">{request.item.sku}</div>}
+                          </div>
+                        </div>
                       </td>
-                    )}
-                    <td>
-                      <strong>{getItemName()}</strong>
-                      {request.item?.sku && <div className="text-muted">{request.item.sku}</div>}
-                    </td>
-                    <td>{getQuantity()}</td>
-                  <td>{request.purpose}</td>
-                  {isAdmin && (
-                    <td>
-                      <div>{request.requestedBy?.username || 'N/A'}</div>
-                      <div className="text-muted">{request.requestedBy?.email || ''}</div>
-                    </td>
-                  )}
-                  <td>{getStatusBadge(request.status)}</td>
-                  <td>{new Date(request.createdAt).toLocaleDateString()}</td>
-                  <td className="action-buttons">
-                    {isAdmin && request.status === 'pending' && (
-                      <>
-                        {request.items && Array.isArray(request.items) && request.items.length > 0 ? (
-                          <button
-                            className="btn btn-action-outline"
-                            onClick={() => handleViewCart(request)}
-                          >
-                            View Cart
-                          </button>
-                        ) : (
+                      <td>{getQuantity()}</td>
+                      <td>{request.purpose}</td>
+                      {isAdmin && (
+                        <td>
+                          <div>{request.requestedBy?.username || 'N/A'}</div>
+                          <div className="text-muted">{request.requestedBy?.email || ''}</div>
+                        </td>
+                      )}
+                      <td>{new Date(request.createdAt).toLocaleDateString()}</td>
+                      <td className="action-buttons">
+                        {isAdmin && request.status === 'pending' && (
                           <>
-                            <button
-                              className="btn btn-action"
-                              onClick={() => handleApprove(request._id)}
-                            >
-                              Approve
-                            </button>
-                            <button
-                              className="btn btn-action-outline"
-                              onClick={() => handleRejectClick(request)}
-                            >
-                              Reject
-                            </button>
+                            {request.items && Array.isArray(request.items) && request.items.length > 0 ? (
+                              <button
+                                className="btn btn-action-outline"
+                                onClick={() => handleViewCart(request)}
+                              >
+                                View Cart
+                              </button>
+                            ) : (
+                              <>
+                                <button
+                                  className="btn btn-action"
+                                  onClick={() => handleApprove(request._id)}
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  className="btn btn-action-outline"
+                                  onClick={() => handleRejectClick(request)}
+                                >
+                                  Reject
+                                </button>
+                              </>
+                            )}
                           </>
                         )}
-                      </>
+                        {request.status === 'approved' && (
+                          <button
+                            className="btn btn-icon btn-action-outline"
+                            onClick={() => handleGenerateRIS(request._id)}
+                            title="Download RIS Document"
+                          >
+                            <MdDescription size={18} />
+                          </button>
+                        )}
+                        {!isAdmin && request.status === 'pending' && (
+                          <button
+                            className="btn btn-action-outline"
+                            onClick={() => handleDelete(request._id)}
+                          >
+                            Cancel
+                          </button>
+                        )}
+                        {request.status === 'rejected' && request.rejectionReason && (
+                          <button
+                            className="btn btn-action-outline"
+                            onClick={() => {
+                              setToast({
+                                message: `Rejection reason: ${request.rejectionReason}`,
+                                type: 'info'
+                              });
+                            }}
+                          >
+                            View Reason
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                    {/* Expanded items row */}
+                    {hasMultipleItems && isExpanded && (
+                      <tr key={`${request._id}-expanded`} className="expanded-row">
+                        <td colSpan={filters.status === 'approved' ? (isAdmin ? "7" : "6") : (isAdmin ? "6" : "5")} 
+                            style={{ padding: '0', backgroundColor: 'var(--bg-tertiary)' }}>
+                          <div className="expanded-content" style={{ padding: '15px 30px' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                              <thead>
+                                <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
+                                  <th style={{ textAlign: 'left', padding: '8px', fontSize: '0.9em', fontWeight: '600', color: 'var(--text-primary)' }}>Item Name</th>
+                                  <th style={{ textAlign: 'left', padding: '8px', fontSize: '0.9em', fontWeight: '600', color: 'var(--text-primary)' }}>SKU</th>
+                                  <th style={{ textAlign: 'left', padding: '8px', fontSize: '0.9em', fontWeight: '600', color: 'var(--text-primary)' }}>Quantity</th>
+                                  <th style={{ textAlign: 'left', padding: '8px', fontSize: '0.9em', fontWeight: '600', color: 'var(--text-primary)' }}>Status</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {request.items.map((reqItem, idx) => (
+                                  <tr key={idx} style={{ borderBottom: '1px solid var(--border-light)' }}>
+                                    <td style={{ padding: '10px 8px', color: 'var(--text-primary)' }}>{reqItem.item?.name || 'N/A'}</td>
+                                    <td style={{ padding: '10px 8px' }} className="text-muted">{reqItem.item?.sku || 'N/A'}</td>
+                                    <td style={{ padding: '10px 8px', color: 'var(--text-primary)' }}>{reqItem.quantity || 0} {reqItem.unit || 'pcs'}</td>
+                                    <td style={{ padding: '10px 8px' }}>
+                                      {reqItem.status === 'approved' && (
+                                        <span className="badge badge-neutral">✓ Approved</span>
+                                      )}
+                                      {reqItem.status === 'rejected' && (
+                                        <div>
+                                          <span className="badge badge-neutral">✗ Rejected</span>
+                                          {reqItem.rejectionReason && (
+                                            <div className="text-muted" style={{ fontSize: '0.85em', marginTop: '4px' }}>
+                                              Reason: {reqItem.rejectionReason}
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
+                                      {reqItem.status === 'pending' && (
+                                        <span className="badge badge-neutral">Pending</span>
+                                      )}
+                                      {!reqItem.status && (
+                                        <span className="badge badge-neutral">{request.status.toUpperCase()}</span>
+                                      )}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </td>
+                      </tr>
                     )}
-                    {request.status === 'approved' && (
-                      <button
-                        className="btn btn-icon btn-action-outline"
-                        onClick={() => handleGenerateRIS(request._id)}
-                        title="Download RIS Document"
-                      >
-                        <MdDescription size={18} />
-                      </button>
-                    )}
-                    {!isAdmin && request.status === 'pending' && (
-                      <button
-                        className="btn btn-action-outline"
-                        onClick={() => handleDelete(request._id)}
-                      >
-                        Cancel
-                      </button>
-                    )}
-                    {request.status === 'rejected' && request.rejectionReason && (
-                      <button
-                        className="btn btn-action-outline"
-                        onClick={() => {
-                          setToast({
-                            message: `Rejection reason: ${request.rejectionReason}`,
-                            type: 'info'
-                          });
-                        }}
-                      >
-                        View Reason
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              );
+                  </>
+                );
               })
             )}
           </tbody>
