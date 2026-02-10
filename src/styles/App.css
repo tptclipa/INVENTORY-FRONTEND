@@ -120,32 +120,12 @@ body {
 
 .login-logo-section {
   flex: 1;
-  background-image: url('/kenny.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 60px 40px;
-  position: relative;
-}
-
-.login-logo-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 71, 187, 0.7);
-  z-index: 1;
-}
-
-.login-logo-section > * {
-  position: relative;
-  z-index: 2;
 }
 
 .login-logo {
@@ -907,15 +887,38 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 15px;
   box-shadow: 0 2px 5px var(--shadow);
   transition: background-color 0.3s ease;
 }
 
+.item-row > span:first-child,
+.transaction-row > span:first-child {
+  flex: 1;
+  font-weight: 500;
+}
+
+.transaction-row .badge {
+  flex-shrink: 0;
+}
+
+.transaction-row .date {
+  flex-shrink: 0;
+  font-size: 0.85em;
+  color: var(--text-muted);
+  min-width: 150px;
+  text-align: right;
+}
+
 .badge {
+  display: inline-block;
   padding: 5px 10px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
+  white-space: nowrap;
+  line-height: 1;
+  vertical-align: middle;
 }
 
 .badge-warning {
@@ -1413,29 +1416,6 @@ td.action-buttons {
 }
 
 /* Badge Styles */
-.badge {
-  display: inline-block;
-  padding: 4px 8px;
-  font-size: 12px;
-  font-weight: 600;
-  border-radius: 4px;
-  text-transform: uppercase;
-}
-
-.badge-success {
-  background-color: #28a745;
-  color: white;
-}
-
-.badge-warning {
-  background-color: #ffc107;
-  color: #333;
-}
-
-.badge-danger {
-  background-color: #dc3545;
-  color: white;
-}
 
 .badge-info {
   background-color: #17a2b8;
