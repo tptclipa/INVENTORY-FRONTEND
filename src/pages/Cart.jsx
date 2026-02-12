@@ -143,7 +143,7 @@ const Cart = () => {
           <p>Add items from the inventory to get started</p>
           <button 
             className="btn btn-primary" 
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/items')}
           >
             Browse Items
           </button>
