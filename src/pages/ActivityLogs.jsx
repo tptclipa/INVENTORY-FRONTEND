@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { activityLogsAPI, usersAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Toast from '../components/Toast';
-import { MdRefresh, MdClear } from 'react-icons/md';
+import { MdRefresh, MdClear, MdChevronLeft, MdChevronRight } from 'react-icons/md';
 
 const ActivityLogs = () => {
   const { isAdmin } = useAuth();
@@ -10,6 +10,8 @@ const ActivityLogs = () => {
   const [users, setUsers] = useState([]);
   const [toast, setToast] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [filters, setFilters] = useState({
     action: '',
     userId: '',
@@ -55,6 +57,7 @@ const ActivityLogs = () => {
       [e.target.name]: e.target.value,
     };
     setFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when filters change
     
     // Automatically apply filters
     applyFilters(newFilters);
@@ -71,6 +74,7 @@ const ActivityLogs = () => {
 
       const data = await activityLogsAPI.getAll(params);
       setLogs(data.data);
+      setCurrentPage(1); // Reset to first page when data changes
     } catch (error) {
       setToast({ message: 'Error loading activity logs', type: 'error' });
     } finally {
@@ -86,6 +90,7 @@ const ActivityLogs = () => {
       endDate: '',
     };
     setFilters(clearedFilters);
+    setCurrentPage(1); // Reset to first page
     applyFilters(clearedFilters);
   };
 
@@ -131,6 +136,57 @@ const ActivityLogs = () => {
     if (days > 0) return `${days} day${days > 1 ? 's' : ''} remaining`;
     if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} remaining`;
     return 'Less than 1 hour';
+  };
+
+  // Pagination calculations
+  const totalPages = Math.ceil(logs.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentLogs = logs.slice(indexOfFirstItem, indexOfLastItem);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handleItemsPerPageChange = (e) => {
+    setItemsPerPage(parseInt(e.target.value));
+    setCurrentPage(1); // Reset to first page
+  };
+
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxPagesToShow = 3;
+    
+    if (totalPages <= maxPagesToShow) {
+      // Show all pages if total is less than max
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Show 3 pages centered around current page
+      let startPage = currentPage - 1;
+      let endPage = currentPage + 1;
+      
+      // Adjust if we're at the beginning
+      if (currentPage === 1) {
+        startPage = 1;
+        endPage = 3;
+      } else if (currentPage === totalPages) {
+        // Adjust if we're at the end
+        startPage = totalPages - 2;
+        endPage = totalPages;
+      }
+      
+      // Make sure we don't go below 1 or above totalPages
+      startPage = Math.max(1, startPage);
+      endPage = Math.min(totalPages, endPage);
+      
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+    }
+    
+    return pages;
   };
 
   return (
@@ -225,7 +281,7 @@ const ActivityLogs = () => {
                 </td>
               </tr>
             ) : (
-              logs.map((log) => (
+              currentLogs.map((log) => (
                 <tr key={log._id}>
                   <td>{formatDate(log.createdAt)}</td>
                   {isAdmin && (
@@ -261,6 +317,64 @@ const ActivityLogs = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination Controls */}
+      {logs.length > 0 && (
+        <div className="pagination-container">
+          <div className="pagination-controls">
+            <button
+              className="pagination-btn arrow"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              title="Previous page"
+            >
+              <MdChevronLeft size={22} />
+            </button>
+
+            {getPageNumbers().map((page, index) => (
+              page === '...' ? (
+                <span key={`ellipsis-${index}`} className="pagination-ellipsis">...</span>
+              ) : (
+                <button
+                  key={page}
+                  className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                  onClick={() => handlePageChange(page)}
+                  title={`Page ${page}`}
+                >
+                  {page}
+                </button>
+              )
+            ))}
+
+            <button
+              className="pagination-btn arrow"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              title="Next page"
+            >
+              <MdChevronRight size={22} />
+            </button>
+          </div>
+
+          <div className="pagination-info">
+            <span>
+              {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, logs.length)} of {logs.length}
+            </span>
+            <select 
+              value={itemsPerPage} 
+              onChange={handleItemsPerPageChange}
+              className="pagination-select"
+              title="Items per page"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </div>
+        </div>
+      )}
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>

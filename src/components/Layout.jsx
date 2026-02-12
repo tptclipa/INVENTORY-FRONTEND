@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
 import { LiaCopyright } from 'react-icons/lia';
-import { MdDashboard, MdInventory, MdCategory, MdSwapHoriz, MdLogout, MdAssignment, MdShoppingCart, MdDarkMode, MdLightMode, MdPeople } from 'react-icons/md';
+import { MdDashboard, MdInventory, MdCategory, MdSwapHoriz, MdLogout, MdAssignment, MdShoppingCart, MdDarkMode, MdLightMode, MdPeople, MdHistory, MdAccountCircle } from 'react-icons/md';
 
 const Layout = ({ children }) => {
   const { user, logout, isAdmin } = useAuth();
@@ -59,13 +59,25 @@ const Layout = ({ children }) => {
               )}
             </Link>
           )}
-          <Link to="/user-management" className={`sidebar-link ${isActive('/user-management') ? 'active' : ''}`}>
-            <MdPeople size={20} />
-            <span>{isAdmin ? 'User Management' : 'My Activity'}</span>
-          </Link>
+          {!isAdmin && (
+            <Link to="/activity-logs" className={`sidebar-link ${isActive('/activity-logs') ? 'active' : ''}`}>
+              <MdHistory size={20} />
+              <span>My Activity</span>
+            </Link>
+          )}
+          {isAdmin && (
+            <Link to="/user-management" className={`sidebar-link ${isActive('/user-management') ? 'active' : ''}`}>
+              <MdPeople size={20} />
+              <span>User Management</span>
+            </Link>
+          )}
         </nav>
 
         <div className="sidebar-footer">
+          <Link to="/profile" className="sidebar-profile-btn">
+            <MdAccountCircle size={20} />
+            <span>My Profile</span>
+          </Link>
           <button onClick={toggleTheme} className="sidebar-theme-btn">
             {isDarkMode ? <MdLightMode size={20} /> : <MdDarkMode size={20} />}
             <span>{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>

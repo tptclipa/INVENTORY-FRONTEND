@@ -11,6 +11,8 @@ import Transactions from './pages/Transactions';
 import Requests from './pages/Requests';
 import Cart from './pages/Cart';
 import UserManagement from './pages/UserManagement';
+import ActivityLogs from './pages/ActivityLogs';
+import Profile from './pages/Profile';
 import Layout from './components/Layout';
 import './styles/App.css';
 
@@ -80,11 +82,11 @@ function AppRoutes() {
       <Route
         path="/categories"
         element={
-          <ProtectedRoute>
+          <AdminRoute>
             <Layout>
               <Categories />
             </Layout>
-          </ProtectedRoute>
+          </AdminRoute>
         }
       />
       <Route
@@ -118,11 +120,31 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/user-management"
+        path="/activity-logs"
         element={
           <ProtectedRoute>
             <Layout>
+              <ActivityLogs />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/user-management"
+        element={
+          <AdminRoute>
+            <Layout>
               <UserManagement />
+            </Layout>
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Profile />
             </Layout>
           </ProtectedRoute>
         }

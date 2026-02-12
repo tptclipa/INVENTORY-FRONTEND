@@ -10,6 +10,7 @@ const Cart = () => {
   const navigate = useNavigate();
   const [toast, setToast] = useState(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [sameAsRequester, setSameAsRequester] = useState(false);
   const [formData, setFormData] = useState({
     purpose: '',
     notes: '',
@@ -26,6 +27,46 @@ const Cart = () => {
       ...formData,
       [name]: value,
     });
+
+    // If updating requester fields and checkbox is checked, update receiver fields too
+    if (sameAsRequester) {
+      if (name === 'requestedByName') {
+        setFormData(prev => ({
+          ...prev,
+          [name]: value,
+          receivedByName: value
+        }));
+        return;
+      } else if (name === 'requestedByDesignation') {
+        setFormData(prev => ({
+          ...prev,
+          [name]: value,
+          receivedByDesignation: value
+        }));
+        return;
+      }
+    }
+  };
+
+  const handleSameAsRequester = (e) => {
+    const checked = e.target.checked;
+    setSameAsRequester(checked);
+
+    if (checked) {
+      // Copy requester data to receiver fields
+      setFormData({
+        ...formData,
+        receivedByName: formData.requestedByName,
+        receivedByDesignation: formData.requestedByDesignation,
+      });
+    } else {
+      // Clear receiver fields when unchecked
+      setFormData({
+        ...formData,
+        receivedByName: '',
+        receivedByDesignation: '',
+      });
+    }
   };
 
   const handleQuantityChange = (itemId, newQuantity) => {
@@ -241,6 +282,18 @@ const Cart = () => {
                 />
               </div>
 
+              <div className="form-group" style={{ marginTop: '15px', marginBottom: '15px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', fontWeight: 'normal' }}>
+                  <input
+                    type="checkbox"
+                    checked={sameAsRequester}
+                    onChange={handleSameAsRequester}
+                    style={{ marginRight: '8px', cursor: 'pointer', width: '18px', height: '18px' }}
+                  />
+                  <span>Same as Requester</span>
+                </label>
+              </div>
+
               <div className="form-group">
                 <label htmlFor="receivedByName">Received By (Name) *</label>
                 <input
@@ -251,6 +304,8 @@ const Cart = () => {
                   onChange={handleFormChange}
                   placeholder="Full name"
                   required
+                  disabled={sameAsRequester}
+                  style={sameAsRequester ? { backgroundColor: '#f5f5f5', cursor: 'not-allowed' } : {}}
                 />
               </div>
 
@@ -264,6 +319,8 @@ const Cart = () => {
                   onChange={handleFormChange}
                   placeholder="e.g., Instructor, Staff"
                   required
+                  disabled={sameAsRequester}
+                  style={sameAsRequester ? { backgroundColor: '#f5f5f5', cursor: 'not-allowed' } : {}}
                 />
               </div>
 
