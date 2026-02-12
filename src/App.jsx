@@ -4,6 +4,9 @@ import { CartProvider } from './context/CartContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Login from './pages/Login';
 import AdminLogin from './pages/AdminLogin';
+import VerifyEmail from './pages/VerifyEmail';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import Items from './pages/Items';
 import Categories from './pages/Categories';
@@ -58,6 +61,18 @@ function AppRoutes() {
       <Route 
         path="/admin" 
         element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <AdminLogin />} 
+      />
+      <Route 
+        path="/verify-email" 
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <VerifyEmail />} 
+      />
+      <Route 
+        path="/forgot-password" 
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <ForgotPassword />} 
+      />
+      <Route 
+        path="/reset-password" 
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <ResetPassword />} 
       />
       <Route
         path="/dashboard"

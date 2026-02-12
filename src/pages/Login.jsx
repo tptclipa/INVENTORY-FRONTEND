@@ -31,7 +31,8 @@ const Login = () => {
     if (isRegister) {
       const result = await register(formData);
       if (result.success) {
-        navigate('/dashboard');
+        // Redirect to email verification page
+        navigate('/verify-email', { state: { email: result.email } });
       } else {
         setError(result.message);
       }
@@ -89,6 +90,10 @@ const Login = () => {
                 Login
               </button>
               </form>
+
+              <p className="register-link">
+                <Link to="/forgot-password">Forgot password?</Link>
+              </p>
 
               <p className="register-link">
                 Don't have an account?{' '}

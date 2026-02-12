@@ -87,7 +87,7 @@ const Profile = () => {
     setLoading(true);
 
     try {
-      await usersAPI.changePassword(user._id, {
+      await usersAPI.changeOwnPassword({
         password: passwordData.newPassword,
       });
       

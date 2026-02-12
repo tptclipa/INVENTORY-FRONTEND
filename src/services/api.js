@@ -29,11 +29,26 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status;
+    const url = error.config?.url || '';
+
+    // Only force logout + reload for 401s on protected APIs,
+    // NOT for auth endpoints like login/register/forgot/reset.
+    const isAuthEndpoint =
+      url.startsWith('/auth/login') ||
+      url.startsWith('/auth/register') ||
+      url.startsWith('/auth/forgot-password') ||
+      url.startsWith('/auth/verify-reset-code') ||
+      url.startsWith('/auth/reset-password') ||
+      url.startsWith('/auth/verify-email') ||
+      url.startsWith('/auth/resend-verification');
+
+    if (status === 401 && !isAuthEndpoint) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/';
     }
+
     return Promise.reject(error.response?.data || error.message);
   }
 );
@@ -44,6 +59,11 @@ export const authAPI = {
   register: (userData) => api.post('/auth/register', userData),
   logout: () => api.post('/auth/logout'),
   getMe: () => api.get('/auth/me'),
+  verifyEmail: (email, code) => api.post('/auth/verify-email', { email, code }),
+  resendVerification: (email) => api.post('/auth/resend-verification', { email }),
+  forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
+  verifyResetCode: (email, code) => api.post('/auth/verify-reset-code', { email, code }),
+  resetPassword: (email, code, newPassword) => api.post('/auth/reset-password', { email, code, newPassword }),
 };
 
 // Users API
@@ -52,7 +72,8 @@ export const usersAPI = {
   create: (data) => api.post('/users', data),
   update: (id, data) => api.put(`/users/${id}`, data),
   delete: (id) => api.delete(`/users/${id}`),
-  changePassword: (id, data) => api.put(`/users/${id}/password`, data),
+  changePassword: (id, data) => api.put(`/users/${id}/password`, data), // Admin only
+  changeOwnPassword: (data) => api.put('/users/me/password', data), // For logged-in user
 };
 
 // Items API

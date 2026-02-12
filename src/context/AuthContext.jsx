@@ -44,15 +44,65 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await authAPI.register(userData);
-      const { token, ...user } = response.data;
+      // New flow: registration returns success with email, not token
+      return { 
+        success: true, 
+        email: response.data.email,
+        message: response.message 
+      };
+    } catch (error) {
+      return { success: false, message: error.message || 'Registration failed' };
+    }
+  };
+
+  const verifyEmail = async (email, code) => {
+    try {
+      const response = await authAPI.verifyEmail(email, code);
+      const { token, ...userData } = response.data;
       
       localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      setUser(user);
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
       
       return { success: true };
     } catch (error) {
-      return { success: false, message: error.message || 'Registration failed' };
+      return { success: false, message: error.message || 'Verification failed' };
+    }
+  };
+
+  const resendVerification = async (email) => {
+    try {
+      await authAPI.resendVerification(email);
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: error.message || 'Failed to resend code' };
+    }
+  };
+
+  const forgotPassword = async (email) => {
+    try {
+      await authAPI.forgotPassword(email);
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: error.message || 'Failed to send reset code' };
+    }
+  };
+
+  const verifyResetCode = async (email, code) => {
+    try {
+      await authAPI.verifyResetCode(email, code);
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: error.message || 'Invalid reset code' };
+    }
+  };
+
+  const resetPassword = async (email, code, newPassword) => {
+    try {
+      await authAPI.resetPassword(email, code, newPassword);
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: error.message || 'Failed to reset password' };
     }
   };
 
@@ -76,6 +126,11 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    verifyEmail,
+    resendVerification,
+    forgotPassword,
+    verifyResetCode,
+    resetPassword,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin',
   };
