@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import Modal from '../components/Modal';
 import Toast from '../components/Toast';
-import { MdAddShoppingCart, MdFileDownload, MdPrint, MdTableChart } from 'react-icons/md';
+import { MdAddShoppingCart, MdFileDownload, MdPrint, MdTableChart, MdEdit, MdDelete, MdAdd, MdMoreVert } from 'react-icons/md';
+import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 
 const Items = () => {
   const { isAdmin } = useAuth();
@@ -13,8 +14,10 @@ const Items = () => {
   const [categories, setCategories] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddToCartModalOpen, setIsAddToCartModalOpen] = useState(false);
+  const [isRestockModalOpen, setIsRestockModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [addingToCartItem, setAddingToCartItem] = useState(null);
+  const [restockingItem, setRestockingItem] = useState(null);
   const [toast, setToast] = useState(null);
   const [filters, setFilters] = useState({
     search: '',
@@ -35,11 +38,18 @@ const Items = () => {
     quantity: 1,
     unit: '',
   });
+  const [restockFormData, setRestockFormData] = useState({
+    quantityToAdd: 1,
+  });
   const [showReportMenu, setShowReportMenu] = useState(false);
+  const [activeItemMenu, setActiveItemMenu] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   useEffect(() => {
     loadItems();
     loadCategories();
+    setCurrentPage(1); // Reset to page 1 when filters change
   }, [filters]);
 
   useEffect(() => {
@@ -47,11 +57,14 @@ const Items = () => {
       if (showReportMenu && !event.target.closest('.report-menu-container')) {
         setShowReportMenu(false);
       }
+      if (activeItemMenu && !event.target.closest('.item-menu-container')) {
+        setActiveItemMenu(null);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showReportMenu]);
+  }, [showReportMenu, activeItemMenu]);
 
   const loadItems = async () => {
     try {
@@ -113,7 +126,7 @@ const Items = () => {
         name: data.data.name,
         description: data.data.description || '',
         sku: data.data.sku || '',
-        category: data.data.category._id,
+        category: data.data.category?._id || '',
         quantity: data.data.quantity,
         unit: data.data.unit || 'pcs',
         customUnit: '',
@@ -159,6 +172,57 @@ const Items = () => {
       loadItems();
     } catch (error) {
       setToast({ message: error.message || 'Error deleting item', type: 'error' });
+    }
+  };
+
+  const handleRestockClick = async (id) => {
+    try {
+      const data = await itemsAPI.getOne(id);
+      setRestockingItem(data.data);
+      setRestockFormData({
+        quantityToAdd: 1,
+      });
+      setIsRestockModalOpen(true);
+    } catch (error) {
+      setToast({ message: 'Error loading item', type: 'error' });
+    }
+  };
+
+  const handleRestockFormChange = (e) => {
+    setRestockFormData({
+      ...restockFormData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleRestockSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const quantityToAdd = parseInt(restockFormData.quantityToAdd);
+      
+      if (quantityToAdd <= 0) {
+        setToast({ message: 'Quantity to add must be greater than 0', type: 'error' });
+        return;
+      }
+
+      const newTotalQuantity = restockingItem.quantity + quantityToAdd;
+
+      // Update the item with the new total quantity
+      await itemsAPI.update(restockingItem._id, {
+        ...restockingItem,
+        quantity: newTotalQuantity,
+        category: restockingItem.category?._id || restockingItem.category, // Send category ID
+      });
+
+      setToast({ 
+        message: `Successfully added ${quantityToAdd} ${restockingItem.unit || 'pcs'}. New total: ${newTotalQuantity}`, 
+        type: 'success' 
+      });
+      setIsRestockModalOpen(false);
+      loadItems();
+    } catch (error) {
+      setToast({ message: error.message || 'Error restocking item', type: 'error' });
     }
   };
 
@@ -286,6 +350,31 @@ const Items = () => {
     }
   };
 
+  // Pagination calculations
+  const totalPages = Math.ceil(items.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = items.slice(indexOfFirstItem, indexOfLastItem);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    setActiveItemMenu(null); // Close any open menus when changing page
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      setActiveItemMenu(null);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      setActiveItemMenu(null);
+    }
+  };
+
   return (
     <div className="container">
       <div className="page-header">
@@ -384,7 +473,7 @@ const Items = () => {
         </select>
       </div>
 
-      <div className="table-container">
+      <div className="table-container" style={{ position: 'relative' }}>
         <table className="data-table">
           <thead>
             <tr>
@@ -404,35 +493,74 @@ const Items = () => {
                 </td>
               </tr>
             ) : (
-              items.map((item) => {
+              currentItems.map((item) => {
                 const isLowStock = item.quantity <= item.minStockLevel;
                 return (
-                  <tr key={item._id} className={isLowStock ? 'low-stock-row' : ''}>
+                  <tr key={item._id} className={`${isLowStock ? 'low-stock-row' : ''} ${activeItemMenu === item._id ? 'row-menu-active' : ''}`}>
                     <td>{item.name}</td>
                     <td>{item.sku || 'N/A'}</td>
-                    <td>{item.category.name}</td>
+                    <td>{item.category?.name || 'N/A'}</td>
                     <td>
                       {item.quantity} {item.unit || 'pcs'}{' '}
                       {isLowStock && <span className="badge badge-warning">Low</span>}
                     </td>
                     <td>{item.minStockLevel}</td>
-                    <td className="action-buttons">
+                    <td className={`action-buttons ${activeItemMenu === item._id ? 'menu-active' : ''}`}>
                       {isAdmin ? (
-                        <>
-                          <button className="btn btn-secondary" onClick={() => handleEditItem(item._id)}>
-                            Edit
-                          </button>
+                        <div style={{ display: 'flex', gap: '5px', alignItems: 'center', position: 'relative' }}>
                           <button 
-                            className="btn btn-success btn-icon" 
-                            onClick={() => handleGenerateItemLabel(item._id)}
-                            title="Generate Label"
+                            className="btn btn-primary btn-icon" 
+                            onClick={() => handleRestockClick(item._id)}
+                            title="Restock"
                           >
-                            <MdPrint size={18} />
+                            <MdAdd size={18} />
                           </button>
-                          <button className="btn btn-danger" onClick={() => handleDeleteItem(item._id)}>
-                            Delete
-                          </button>
-                        </>
+                          <div className="item-menu-container">
+                            <button 
+                              className="btn btn-secondary btn-icon" 
+                              onClick={() => setActiveItemMenu(activeItemMenu === item._id ? null : item._id)}
+                              title="More options"
+                            >
+                              <MdMoreVert size={18} />
+                            </button>
+                            {activeItemMenu === item._id && (
+                              <div className="dropdown-menu">
+                                <button
+                                  onClick={() => {
+                                    handleEditItem(item._id);
+                                    setActiveItemMenu(null);
+                                  }}
+                                  className="dropdown-menu-item"
+                                >
+                                  <MdEdit size={18} />
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    handleGenerateItemLabel(item._id);
+                                    setActiveItemMenu(null);
+                                  }}
+                                  className="dropdown-menu-item"
+                                >
+                                  <MdPrint size={18} />
+                                  Print Label
+                                </button>
+                                <div className="dropdown-menu-divider" />
+                                <button
+                                  onClick={() => {
+                                    handleDeleteItem(item._id);
+                                    setActiveItemMenu(null);
+                                  }}
+                                  className="dropdown-menu-item"
+                                  style={{ color: '#e74c3c' }}
+                                >
+                                  <MdDelete size={18} />
+                                  Delete
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       ) : (
                         <button 
                           className="btn btn-icon btn-primary" 
@@ -451,6 +579,38 @@ const Items = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination Controls */}
+      {items.length > 0 && totalPages > 1 && (
+        <div className="pagination-container">
+          <button 
+            className="pagination-arrow" 
+            onClick={handlePrevPage}
+            disabled={currentPage === 1}
+            title="Previous page"
+          >
+            <IoIosArrowBack size={20} />
+          </button>
+          <div className="pagination-dots">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                className={`pagination-dot ${currentPage === page ? 'active' : ''}`}
+                onClick={() => handlePageChange(page)}
+                title={`Page ${page}`}
+              />
+            ))}
+          </div>
+          <button 
+            className="pagination-arrow" 
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}
+            title="Next page"
+          >
+            <IoIosArrowForward size={20} />
+          </button>
+        </div>
+      )}
 
       {isAdmin && (
         <Modal
@@ -641,6 +801,51 @@ const Items = () => {
               </button>
               <button type="submit" className="btn btn-primary">
                 Add to Cart
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {/* Restock Modal */}
+      {isAdmin && restockingItem && (
+        <Modal
+          isOpen={isRestockModalOpen}
+          onClose={() => setIsRestockModalOpen(false)}
+          title={`Restock: ${restockingItem.name}`}
+        >
+          <form onSubmit={handleRestockSubmit}>
+            <div className="info-box">
+              <p><strong>Item:</strong> {restockingItem.name}</p>
+              <p><strong>Current Stock:</strong> {restockingItem.quantity} {restockingItem.unit || 'pcs'}</p>
+              {restockingItem.quantity <= restockingItem.minStockLevel && (
+                <p className="text-warning">⚠️ This item is low in stock</p>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="quantityToAdd">Quantity to Add *</label>
+              <input
+                type="number"
+                id="quantityToAdd"
+                name="quantityToAdd"
+                min="1"
+                value={restockFormData.quantityToAdd}
+                onChange={handleRestockFormChange}
+                required
+                autoFocus
+              />
+              <small style={{ color: '#666', marginTop: '5px', display: 'block' }}>
+                New total will be: {restockingItem.quantity + parseInt(restockFormData.quantityToAdd || 0)} {restockingItem.unit || 'pcs'}
+              </small>
+            </div>
+
+            <div className="form-actions">
+              <button type="button" className="btn btn-secondary" onClick={() => setIsRestockModalOpen(false)}>
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary">
+                Restock Item
               </button>
             </div>
           </form>

@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
 import { LiaCopyright } from 'react-icons/lia';
-import { MdDashboard, MdInventory, MdCategory, MdSwapHoriz, MdLogout, MdAssignment, MdShoppingCart, MdDarkMode, MdLightMode } from 'react-icons/md';
+import { MdDashboard, MdInventory, MdCategory, MdSwapHoriz, MdLogout, MdAssignment, MdShoppingCart, MdDarkMode, MdLightMode, MdHistory } from 'react-icons/md';
 
 const Layout = ({ children }) => {
   const { user, logout, isAdmin } = useAuth();
@@ -42,12 +42,10 @@ const Layout = ({ children }) => {
               <span>Categories</span>
             </Link>
           )}
-          {isAdmin && (
-            <Link to="/transactions" className={`sidebar-link ${isActive('/transactions') ? 'active' : ''}`}>
-              <MdSwapHoriz size={20} />
-              <span>Transactions</span>
-            </Link>
-          )}
+          <Link to="/transactions" className={`sidebar-link ${isActive('/transactions') ? 'active' : ''}`}>
+            <MdSwapHoriz size={20} />
+            <span>{isAdmin ? 'All Transactions' : 'My Transactions'}</span>
+          </Link>
           <Link to="/requests" className={`sidebar-link ${isActive('/requests') ? 'active' : ''}`}>
             <MdAssignment size={20} />
             <span>{isAdmin ? 'Manage Requests' : 'My Requests'}</span>
@@ -61,6 +59,10 @@ const Layout = ({ children }) => {
               )}
             </Link>
           )}
+          <Link to="/activity-logs" className={`sidebar-link ${isActive('/activity-logs') ? 'active' : ''}`}>
+            <MdHistory size={20} />
+            <span>{isAdmin ? 'Activity Logs' : 'My Activity'}</span>
+          </Link>
         </nav>
 
         <div className="sidebar-footer">

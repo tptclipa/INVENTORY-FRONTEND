@@ -56,10 +56,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
+  const logout = async () => {
+    try {
+      // Call backend to log the logout activity
+      await authAPI.logout();
+    } catch (error) {
+      console.error('Error logging out:', error);
+    } finally {
+      // Clear local storage and user state regardless of API call result
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setUser(null);
+    }
   };
 
   const value = {

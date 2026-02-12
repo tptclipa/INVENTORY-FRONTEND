@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { transactionsAPI, itemsAPI, documentsAPI, excelAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import Modal from '../components/Modal';
 import Toast from '../components/Toast';
 import { MdFileDownload, MdTableChart } from 'react-icons/md';
 
 const Transactions = () => {
+  const { isAdmin } = useAuth();
   const [transactions, setTransactions] = useState([]);
   const [items, setItems] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -151,26 +153,30 @@ const Transactions = () => {
   return (
     <div className="container">
       <div className="page-header">
-        <h2>Transaction History</h2>
+        <h2>{isAdmin ? 'All Transaction History' : 'My Transaction History'}</h2>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button 
-            className="btn btn-secondary" 
-            onClick={handleGenerateTransactionReport}
-            style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
-          >
-            <MdFileDownload size={20} />
-            Word Report
-          </button>
-          <button 
-            className="btn btn-excel"
-            onClick={handleExportTransactionExcel}
-          >
-            <MdTableChart size={18} />
-            Excel Export
-          </button>
-          <button className="btn btn-primary" onClick={handleAddTransaction}>
-            New Transaction
-          </button>
+          {isAdmin && (
+            <>
+              <button 
+                className="btn btn-secondary" 
+                onClick={handleGenerateTransactionReport}
+                style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
+              >
+                <MdFileDownload size={20} />
+                Word Report
+              </button>
+              <button 
+                className="btn btn-excel"
+                onClick={handleExportTransactionExcel}
+              >
+                <MdTableChart size={18} />
+                Excel Export
+              </button>
+              <button className="btn btn-primary" onClick={handleAddTransaction}>
+                New Transaction
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -223,7 +229,7 @@ const Transactions = () => {
               transactions.map((transaction) => (
                 <tr key={transaction._id}>
                   <td>{formatDate(transaction.createdAt)}</td>
-                  <td>{transaction.item.name}</td>
+                  <td>{transaction.item?.name || 'Unknown Item'}</td>
                   <td>
                     <span
                       className={`badge ${
@@ -234,7 +240,7 @@ const Transactions = () => {
                     </span>
                   </td>
                   <td>{transaction.quantity}</td>
-                  <td>{transaction.performedBy.username}</td>
+                  <td>{transaction.performedBy?.username || 'Unknown'}</td>
                   <td>{transaction.notes || 'N/A'}</td>
                 </tr>
               ))

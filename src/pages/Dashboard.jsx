@@ -35,7 +35,7 @@ const Dashboard = () => {
         itemsAPI.getAll(),
         categoriesAPI.getAll(),
         itemsAPI.getLowStock(),
-        transactionsAPI.getAll(),
+        transactionsAPI.getAll(),  // Now returns user's own transactions for regular users
       ]);
 
       setStats({
@@ -83,7 +83,7 @@ const Dashboard = () => {
     if (isAdmin) {
       return 'Manage your inventory, track items, and oversee all operations';
     }
-    return 'Browse items, place requests, and track your orders';
+    return 'Browse items, place requests, and track your requests';
   };
 
   return (
@@ -116,7 +116,7 @@ const Dashboard = () => {
         </div>
 
         <div className="stat-card">
-          <h3>Total Transactions</h3>
+          <h3>{isAdmin ? 'Total Transactions' : 'My Transactions'}</h3>
           <p className="stat-value">{stats.totalTransactions}</p>
         </div>
       </div>
@@ -141,14 +141,14 @@ const Dashboard = () => {
         </div>
 
         <div className="section">
-          <h3>Recent Transactions</h3>
+          <h3>{isAdmin ? 'Recent Transactions' : 'My Recent Activity'}</h3>
           <div className="transactions-list">
             {recentTransactions.length === 0 ? (
               <p>No recent transactions</p>
             ) : (
               recentTransactions.map((transaction) => (
                 <div key={transaction._id} className="transaction-row">
-                  <span>{transaction.item.name}</span>
+                  <span>{transaction.item?.name || 'Unknown Item'}</span>
                   <span className={`badge ${transaction.type === 'in' ? 'badge-success' : 'badge-danger'}`}>
                     {transaction.type === 'in' ? '+' : '-'}
                     {transaction.quantity}

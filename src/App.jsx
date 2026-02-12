@@ -10,6 +10,7 @@ import Categories from './pages/Categories';
 import Transactions from './pages/Transactions';
 import Requests from './pages/Requests';
 import Cart from './pages/Cart';
+import ActivityLogs from './pages/ActivityLogs';
 import Layout from './components/Layout';
 import './styles/App.css';
 
@@ -22,6 +23,25 @@ const ProtectedRoute = ({ children }) => {
   }
 
   return isAuthenticated ? children : <Navigate to="/" replace />;
+};
+
+// Admin Only Route Component
+const AdminRoute = ({ children }) => {
+  const { isAuthenticated, isAdmin, loading } = useAuth();
+
+  if (loading) {
+    return <div className="loading">Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
 };
 
 function AppRoutes() {
@@ -93,6 +113,16 @@ function AppRoutes() {
           <ProtectedRoute>
             <Layout>
               <Cart />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/activity-logs"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ActivityLogs />
             </Layout>
           </ProtectedRoute>
         }

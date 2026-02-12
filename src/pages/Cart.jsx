@@ -128,14 +128,14 @@ const Cart = () => {
         <div className="cart-items-section">
           <div className="cart-items-list">
             {cartItems.map((cartItem) => (
-              <div key={cartItem.item._id} className="cart-item">
+              <div key={cartItem.item?._id || Math.random()} className="cart-item">
                 <div className="cart-item-info">
-                  <h4>{cartItem.item.name}</h4>
-                  {cartItem.item.sku && (
+                  <h4>{cartItem.item?.name || 'Unknown Item'}</h4>
+                  {cartItem.item?.sku && (
                     <p className="text-muted">SKU: {cartItem.item.sku}</p>
                   )}
-                  <p className="text-muted">Available: {cartItem.item.quantity}</p>
-                  {cartItem.item.quantity <= cartItem.item.minStockLevel && (
+                  <p className="text-muted">Available: {cartItem.item?.quantity || 0}</p>
+                  {cartItem.item?.quantity <= cartItem.item?.minStockLevel && (
                     <p className="text-warning">⚠️ Low stock</p>
                   )}
                 </div>

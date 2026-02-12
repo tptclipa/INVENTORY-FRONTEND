@@ -3,6 +3,7 @@ import { categoriesAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/Modal';
 import Toast from '../components/Toast';
+import { MdEdit, MdDelete } from 'react-icons/md';
 
 const Categories = () => {
   const { isAdmin } = useAuth();
@@ -145,16 +146,18 @@ const Categories = () => {
                     {isAdmin ? (
                       <>
                         <button
-                          className="btn btn-secondary"
+                          className="btn btn-secondary btn-icon"
                           onClick={() => handleEditCategory(category._id)}
+                          title="Edit"
                         >
-                          Edit
+                          <MdEdit size={18} />
                         </button>
                         <button
-                          className="btn btn-danger"
+                          className="btn btn-danger btn-icon"
                           onClick={() => handleDeleteCategory(category._id)}
+                          title="Delete"
                         >
-                          Delete
+                          <MdDelete size={18} />
                         </button>
                       </>
                     ) : (

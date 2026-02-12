@@ -42,7 +42,13 @@ api.interceptors.response.use(
 export const authAPI = {
   login: (credentials) => api.post('/auth/login', credentials),
   register: (userData) => api.post('/auth/register', userData),
+  logout: () => api.post('/auth/logout'),
   getMe: () => api.get('/auth/me'),
+};
+
+// Users API
+export const usersAPI = {
+  getAll: () => api.get('/users'),
 };
 
 // Items API
@@ -162,6 +168,13 @@ export const excelAPI = {
     });
     return response.data;
   },
+};
+
+// Activity Logs API
+export const activityLogsAPI = {
+  getAll: (params) => api.get('/activity-logs', { params }),
+  getStats: (params) => api.get('/activity-logs/stats', { params }),
+  cleanup: () => api.delete('/activity-logs/cleanup'),
 };
 
 // RIS (Requisition and Issue Slip) API
