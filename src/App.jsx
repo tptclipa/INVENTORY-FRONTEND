@@ -10,7 +10,7 @@ import Categories from './pages/Categories';
 import Transactions from './pages/Transactions';
 import Requests from './pages/Requests';
 import Cart from './pages/Cart';
-import ActivityLogs from './pages/ActivityLogs';
+import UserManagement from './pages/UserManagement';
 import Layout from './components/Layout';
 import './styles/App.css';
 
@@ -118,11 +118,11 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/activity-logs"
+        path="/user-management"
         element={
           <ProtectedRoute>
             <Layout>
-              <ActivityLogs />
+              <UserManagement />
             </Layout>
           </ProtectedRoute>
         }

@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
 import { LiaCopyright } from 'react-icons/lia';
-import { MdDashboard, MdInventory, MdCategory, MdSwapHoriz, MdLogout, MdAssignment, MdShoppingCart, MdDarkMode, MdLightMode, MdHistory } from 'react-icons/md';
+import { MdDashboard, MdInventory, MdCategory, MdSwapHoriz, MdLogout, MdAssignment, MdShoppingCart, MdDarkMode, MdLightMode, MdPeople } from 'react-icons/md';
 
 const Layout = ({ children }) => {
   const { user, logout, isAdmin } = useAuth();
@@ -59,9 +59,9 @@ const Layout = ({ children }) => {
               )}
             </Link>
           )}
-          <Link to="/activity-logs" className={`sidebar-link ${isActive('/activity-logs') ? 'active' : ''}`}>
-            <MdHistory size={20} />
-            <span>{isAdmin ? 'Activity Logs' : 'My Activity'}</span>
+          <Link to="/user-management" className={`sidebar-link ${isActive('/user-management') ? 'active' : ''}`}>
+            <MdPeople size={20} />
+            <span>{isAdmin ? 'User Management' : 'My Activity'}</span>
           </Link>
         </nav>
 

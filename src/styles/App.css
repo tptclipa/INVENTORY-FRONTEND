@@ -1121,6 +1121,148 @@ td.action-buttons.menu-active {
   line-height: 1;
 }
 
+/* Tab Navigation */
+.tab-navigation {
+  display: flex;
+  gap: 0;
+  margin-bottom: 30px;
+  border-bottom: 2px solid var(--border-color);
+  background: var(--card-bg);
+  border-radius: 8px 8px 0 0;
+  overflow: hidden;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 16px 24px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  position: relative;
+}
+
+.tab-button:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.tab-button.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  background: var(--hover-bg);
+}
+
+.tab-button svg {
+  transition: transform 0.3s ease;
+}
+
+.tab-button.active svg {
+  transform: scale(1.1);
+}
+
+.tab-content {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header Icon Buttons */
+.btn-icon-header {
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-icon-header:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-icon-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-icon-primary:hover {
+  background: #1e40af;
+}
+
+.btn-icon-secondary {
+  background: var(--secondary);
+  color: white;
+}
+
+.btn-icon-secondary:hover {
+  background: #475569;
+}
+
+.dark-mode .btn-icon-secondary {
+  background: #475569;
+}
+
+.dark-mode .btn-icon-secondary:hover {
+  background: #334155;
+}
+
+/* Action Icons - Clean Icons Only */
+.action-icon {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.action-icon:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.action-icon-edit {
+  color: var(--primary);
+}
+
+.action-icon-edit:hover {
+  color: #1e40af;
+}
+
+.action-icon-password {
+  color: #f59e0b;
+}
+
+.action-icon-password:hover {
+  color: #d97706;
+}
+
+.action-icon-delete {
+  color: var(--danger);
+}
+
+.action-icon-delete:hover {
+  color: #b91c1c;
+}
+
 /* Modal Styles */
 .modal {
   display: none;

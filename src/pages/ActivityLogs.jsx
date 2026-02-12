@@ -8,12 +8,10 @@ const ActivityLogs = () => {
   const { isAdmin } = useAuth();
   const [logs, setLogs] = useState([]);
   const [users, setUsers] = useState([]);
-  const [stats, setStats] = useState(null);
   const [toast, setToast] = useState(null);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
     action: '',
-    resourceType: '',
     userId: '',
     startDate: '',
     endDate: '',
@@ -22,7 +20,6 @@ const ActivityLogs = () => {
   useEffect(() => {
     loadLogs();
     if (isAdmin) {
-      loadStats();
       loadUsers();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -51,14 +48,6 @@ const ActivityLogs = () => {
     }
   };
 
-  const loadStats = async () => {
-    try {
-      const data = await activityLogsAPI.getStats();
-      setStats(data.data);
-    } catch (error) {
-      console.error('Error loading stats:', error);
-    }
-  };
 
   const handleFilterChange = (e) => {
     const newFilters = {
@@ -76,7 +65,6 @@ const ActivityLogs = () => {
       setLoading(true);
       const params = {};
       if (filterParams.action) params.action = filterParams.action;
-      if (filterParams.resourceType) params.resourceType = filterParams.resourceType;
       if (filterParams.userId) params.userId = filterParams.userId;
       if (filterParams.startDate) params.startDate = filterParams.startDate;
       if (filterParams.endDate) params.endDate = filterParams.endDate;
@@ -93,7 +81,6 @@ const ActivityLogs = () => {
   const handleClearFilters = () => {
     const clearedFilters = {
       action: '',
-      resourceType: '',
       userId: '',
       startDate: '',
       endDate: '',
@@ -105,7 +92,6 @@ const ActivityLogs = () => {
   const handleRefresh = () => {
     applyFilters(filters);
     if (isAdmin) {
-      loadStats();
       loadUsers();
     }
   };
@@ -148,35 +134,19 @@ const ActivityLogs = () => {
   };
 
   return (
-    <div className="container">
+    <div>
       <div className="page-header">
-        <h2>{isAdmin ? 'All Activity Logs' : 'My Activity Logs'}</h2>
+        <h2>{isAdmin ? 'Activity Logs' : 'My Activity Logs'}</h2>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button className="btn btn-secondary" onClick={handleRefresh}>
-            <MdRefresh size={20} />
-            Refresh
+          <button 
+            className="btn-icon-header btn-icon-secondary" 
+            onClick={handleRefresh}
+            title="Refresh"
+          >
+            <MdRefresh size={22} />
           </button>
         </div>
       </div>
-
-      {isAdmin && stats && (
-        <div className="dashboard-grid" style={{ marginBottom: '20px' }}>
-          <div className="stat-card">
-            <h3>Total Logs</h3>
-            <p className="stat-value">{stats.totalLogs}</p>
-          </div>
-          <div className="stat-card warning">
-            <h3>Expiring Soon</h3>
-            <p className="stat-value">{stats.expiringLogs}</p>
-            <small>Within 3 days</small>
-          </div>
-          <div className="stat-card">
-            <h3>Retention Period</h3>
-            <p className="stat-value">3 Weeks</p>
-            <small>Auto-cleanup enabled</small>
-          </div>
-        </div>
-      )}
 
       <div className="filters">
         <select name="action" value={filters.action} onChange={handleFilterChange}>
@@ -192,16 +162,6 @@ const ActivityLogs = () => {
           <option value="reject_request">Reject Request</option>
           <option value="generate_report">Generate Report</option>
           <option value="export_data">Export Data</option>
-        </select>
-        
-        <select name="resourceType" value={filters.resourceType} onChange={handleFilterChange}>
-          <option value="">All Resource Types</option>
-          <option value="item">Item</option>
-          <option value="category">Category</option>
-          <option value="transaction">Transaction</option>
-          <option value="request">Request</option>
-          <option value="report">Report</option>
-          <option value="system">System</option>
         </select>
 
         {isAdmin && (
@@ -236,7 +196,6 @@ const ActivityLogs = () => {
         />
         
         <button className="btn btn-secondary" onClick={handleClearFilters}>
-          <MdClear size={18} />
           Clear
         </button>
       </div>
@@ -248,7 +207,6 @@ const ActivityLogs = () => {
               <th>Date & Time</th>
               {isAdmin && <th>User</th>}
               <th>Action</th>
-              <th>Resource</th>
               <th>Details</th>
               <th>Expires</th>
             </tr>
@@ -256,13 +214,13 @@ const ActivityLogs = () => {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={isAdmin ? 6 : 5} className="text-center">
+                <td colSpan={isAdmin ? 5 : 4} className="text-center">
                   Loading...
                 </td>
               </tr>
             ) : logs.length === 0 ? (
               <tr>
-                <td colSpan={isAdmin ? 6 : 5} className="text-center">
+                <td colSpan={isAdmin ? 5 : 4} className="text-center">
                   No activity logs found
                 </td>
               </tr>
@@ -283,11 +241,6 @@ const ActivityLogs = () => {
                   <td>
                     <span className={`badge ${getActionBadgeClass(log.action)}`}>
                       {formatAction(log.action)}
-                    </span>
-                  </td>
-                  <td>
-                    <span className="badge badge-info">
-                      {log.resourceType}
                     </span>
                   </td>
                   <td>
