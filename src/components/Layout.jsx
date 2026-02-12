@@ -82,10 +82,6 @@ const Layout = ({ children }) => {
             {isDarkMode ? <MdLightMode size={20} /> : <MdDarkMode size={20} />}
             <span>{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
           </button>
-          <button onClick={logout} className="sidebar-logout-btn">
-            <MdLogout size={20} />
-            <span>Logout</span>
-          </button>
           <Link to="/admin" className="footer-link-sidebar">
             <LiaCopyright size={16} />
             <span>TESDA PTC 2026</span>

@@ -199,7 +199,7 @@ const Profile = () => {
             onClick={handleLogout}
           >
             <MdLogout size={20} />
-            <span>Log out @{user?.username}</span>
+            <span>Log out</span>
           </button>
         </div>
 
