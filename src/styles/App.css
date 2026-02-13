@@ -509,9 +509,9 @@ body {
 
 .sidebar-brand-admin-tag {
   position: absolute;
-  top: -12px;
+  top: -14px;
   right: 0;
-  font-size: 0.42em;
+  font-size: 0.7em;
   font-weight: 700;
   color: var(--primary-blue);
   text-transform: lowercase;
