@@ -24,7 +24,14 @@ const Layout = ({ children }) => {
             alt="TESDA Logo" 
             className="sidebar-logo"
           />
-          <h1 className="sidebar-brand">INVENTORY</h1>
+          {isAdmin ? (
+            <div className="sidebar-brand-admin-wrap">
+              <span className="sidebar-brand-admin-tag">admin</span>
+              <h1 className="sidebar-brand">INVENTORY</h1>
+            </div>
+          ) : (
+            <h1 className="sidebar-brand">INVENTORY</h1>
+          )}
         </div>
 
         <nav className="sidebar-nav">
