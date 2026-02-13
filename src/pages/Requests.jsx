@@ -522,7 +522,7 @@ const Requests = () => {
               <thead style={{ position: 'sticky', top: 0, backgroundColor: 'var(--bg-primary)', zIndex: 1 }}>
                 <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
                   <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: '600' }}>Item Name</th>
-                  <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: '600' }}>SKU</th>
+                  <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: '600' }}>Stock No.</th>
                   <th style={{ textAlign: 'right', padding: '12px 8px', fontWeight: '600' }}>Quantity</th>
                 </tr>
               </thead>
