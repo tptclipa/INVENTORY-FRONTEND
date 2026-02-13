@@ -492,7 +492,9 @@ body {
   margin: 0;
   color: var(--primary-blue);
   text-align: center;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
+  font-family: Georgia, 'Times New Roman', serif;
+  text-transform: uppercase;
 }
 
 /* Admin mode: INVENTORY with "admin" tag above RY */
