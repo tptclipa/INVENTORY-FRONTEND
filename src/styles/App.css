@@ -1046,6 +1046,66 @@ body {
   min-height: 530px;
 }
 
+/* Categories page: compact table so pagination stays visible */
+.categories-page .categories-table-container {
+  min-height: 0;
+}
+
+.categories-page .categories-table tbody {
+  min-height: 0;
+}
+
+.categories-page .categories-table tbody tr,
+.categories-page .categories-table tbody tr td {
+  height: auto !important;
+  min-height: 48px !important;
+  max-height: none !important;
+}
+
+.categories-page .categories-table .th-actions {
+  text-align: right;
+}
+
+.categories-page .categories-table .td-actions {
+  text-align: right;
+}
+
+.categories-page .categories-table .td-actions.action-buttons {
+  justify-content: flex-end;
+}
+
+.categories-page .pagination-container-categories {
+  border-top: 1px solid var(--border-color);
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.categories-page .pagination-container-categories .pagination-controls {
+  order: 1;
+}
+
+.categories-page .pagination-container-categories .pagination-info {
+  order: 2;
+}
+
+.categories-page .btn-add-category {
+  min-width: 48px;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.categories-page .categories-filters input {
+  max-width: 320px;
+}
+
+.pagination-empty-label {
+  color: var(--text-muted);
+  font-size: 14px;
+  padding: 0 8px;
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse !important;
@@ -1506,6 +1566,11 @@ td.action-buttons.menu-active {
 
   .page-header button {
     width: 100%;
+  }
+
+  .page-header .btn-add-category {
+    width: 48px;
+    min-width: 48px;
   }
 
   /* Sidebar Responsive */

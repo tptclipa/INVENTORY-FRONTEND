@@ -3,7 +3,7 @@ import { categoriesAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/Modal';
 import Toast from '../components/Toast';
-import { MdEdit, MdDelete } from 'react-icons/md';
+import { MdEdit, MdDelete, MdChevronLeft, MdChevronRight, MdAdd } from 'react-icons/md';
 
 const Categories = () => {
   const { isAdmin } = useAuth();
@@ -11,6 +11,9 @@ const Categories = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [toast, setToast] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -23,7 +26,8 @@ const Categories = () => {
   const loadCategories = async () => {
     try {
       const data = await categoriesAPI.getAll();
-      setCategories(data.data);
+      setCategories(data.data || []);
+      setCurrentPage(1);
     } catch (error) {
       setToast({ message: 'Error loading categories', type: 'error' });
     }
@@ -110,39 +114,109 @@ const Categories = () => {
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
   };
 
+  // Filter categories by search (name + description)
+  const filteredCategories = searchQuery.trim()
+    ? categories.filter((cat) => {
+        const q = searchQuery.toLowerCase().trim();
+        const name = (cat.name || '').toLowerCase();
+        const desc = (cat.description || '').toLowerCase();
+        return name.includes(q) || desc.includes(q);
+      })
+    : categories;
+
+  // Pagination (based on filtered list)
+  const totalPages = Math.max(1, Math.ceil(filteredCategories.length / itemsPerPage));
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentCategories = filteredCategories.slice(indexOfFirstItem, indexOfLastItem);
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(Math.max(1, Math.min(pageNumber, totalPages)));
+  };
+
+  const hasCategories = categories.length > 0;
+  const hasFilteredResults = filteredCategories.length > 0;
+
+  const handleItemsPerPageChange = (e) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1);
+  };
+
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxPagesToShow = 3;
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      let startPage = Math.max(1, currentPage - 1);
+      let endPage = Math.min(totalPages, currentPage + 1);
+      if (currentPage === 1) endPage = 3;
+      else if (currentPage === totalPages) startPage = totalPages - 2;
+      for (let i = startPage; i <= endPage; i++) pages.push(i);
+    }
+    return pages;
+  };
+
   return (
-    <div className="container">
+    <div className="container categories-page">
       <div className="page-header">
         <h2>Categories Management</h2>
-        <button className="btn btn-primary" onClick={handleAddCategory}>
-          Add New Category
+        <button
+          type="button"
+          className="btn btn-primary btn-icon btn-add-category"
+          onClick={handleAddCategory}
+          title="Add New Category"
+        >
+          <MdAdd size={20} />
         </button>
       </div>
 
-      <div className="table-container">
-        <table className="data-table">
+      <div className="filters categories-filters">
+        <input
+          type="text"
+          placeholder="Search by name or description..."
+          value={searchQuery}
+          onChange={handleSearchChange}
+          className="search-input"
+          aria-label="Search categories"
+        />
+      </div>
+
+      <div className="table-container categories-table-container">
+        <table className="data-table categories-table">
           <thead>
             <tr>
               <th>Name</th>
               <th>Description</th>
               <th>Created At</th>
-              <th>Actions</th>
+              <th className="th-actions">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {categories.length === 0 ? (
+            {!hasCategories ? (
               <tr>
                 <td colSpan="4" className="text-center">
                   No categories found
                 </td>
               </tr>
+            ) : !hasFilteredResults ? (
+              <tr>
+                <td colSpan="4" className="text-center">
+                  No categories match your search
+                </td>
+              </tr>
             ) : (
-              categories.map((category) => (
+              currentCategories.map((category) => (
                 <tr key={category._id}>
                   <td>{category.name}</td>
                   <td>{category.description || 'N/A'}</td>
                   <td>{formatDate(category.createdAt)}</td>
-                  <td className="action-buttons">
+                  <td className="action-buttons td-actions">
                     {isAdmin ? (
                       <>
                         <button
@@ -169,6 +243,63 @@ const Categories = () => {
             )}
           </tbody>
         </table>
+      </div>
+
+      <div className="pagination-container pagination-container-categories">
+        <div className="pagination-controls">
+          <button
+            type="button"
+            className="pagination-btn arrow"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1 || !hasFilteredResults}
+            title="Previous page"
+          >
+            <MdChevronLeft size={22} />
+          </button>
+          {hasFilteredResults ? (
+            getPageNumbers().map((page) => (
+              <button
+                key={page}
+                type="button"
+                className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
+                onClick={() => handlePageChange(page)}
+                title={`Page ${page}`}
+              >
+                {page}
+              </button>
+            ))
+          ) : (
+            <span className="pagination-empty-label">1</span>
+          )}
+          <button
+            type="button"
+            className="pagination-btn arrow"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages || !hasFilteredResults}
+            title="Next page"
+          >
+            <MdChevronRight size={22} />
+          </button>
+        </div>
+        <div className="pagination-info">
+          <span>
+            {!hasFilteredResults
+              ? '0 of 0'
+              : `${indexOfFirstItem + 1}-${Math.min(indexOfLastItem, filteredCategories.length)} of ${filteredCategories.length}`}
+          </span>
+          <select
+            value={itemsPerPage}
+            onChange={handleItemsPerPageChange}
+            className="pagination-select"
+            title="Items per page"
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+        </div>
       </div>
 
       <Modal
