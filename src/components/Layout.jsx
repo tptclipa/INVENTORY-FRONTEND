@@ -42,10 +42,12 @@ const Layout = ({ children }) => {
               <span>Categories</span>
             </Link>
           )}
-          <Link to="/transactions" className={`sidebar-link ${isActive('/transactions') ? 'active' : ''}`}>
-            <MdSwapHoriz size={20} />
-            <span>{isAdmin ? 'All Transactions' : 'My Transactions'}</span>
-          </Link>
+          {isAdmin && (
+            <Link to="/transactions" className={`sidebar-link ${isActive('/transactions') ? 'active' : ''}`}>
+              <MdSwapHoriz size={20} />
+              <span>All Transactions</span>
+            </Link>
+          )}
           <Link to="/requests" className={`sidebar-link ${isActive('/requests') ? 'active' : ''}`}>
             <MdAssignment size={20} />
             <span>{isAdmin ? 'Manage Requests' : 'My Requests'}</span>

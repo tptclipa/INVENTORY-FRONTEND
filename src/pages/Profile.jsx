@@ -377,7 +377,7 @@ const Profile = () => {
         <div className="confirm-modal-overlay" onClick={cancelLogout}>
           <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
             <div className="confirm-modal-header">
-              <h3>{window.location.host} says</h3>
+              <h3>TESDA INVENTORY</h3>
             </div>
             <div className="confirm-modal-body">
               <p>Are you sure you want to logout?</p>

@@ -18,6 +18,7 @@ const Requests = () => {
   });
   const [rejectionReason, setRejectionReason] = useState('');
   const [selectedForBatch, setSelectedForBatch] = useState([]);
+  const [showBatchSelect, setShowBatchSelect] = useState(false);
 
   useEffect(() => {
     loadRequests();
@@ -160,13 +161,20 @@ const Requests = () => {
         <h2>{isAdmin ? 'Manage Requests' : 'My Requests'}</h2>
       </div>
 
-      <div className="filters">
+      <div className="filters" style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
         <select name="status" value={filters.status} onChange={handleFilterChange}>
           <option value="">All Status</option>
           <option value="pending">Pending</option>
           <option value="approved">Approved</option>
           <option value="rejected">Rejected</option>
         </select>
+        <button
+          type="button"
+          className={showBatchSelect ? 'btn btn-action-outline' : 'btn btn-action'}
+          onClick={() => setShowBatchSelect(prev => !prev)}
+        >
+          {showBatchSelect ? 'Hide selection' : 'Generate multiple RIS'}
+        </button>
       </div>
 
       {selectedForBatch.length > 0 && (
@@ -180,7 +188,7 @@ const Requests = () => {
           </button>
           {selectedForBatch.length < 2 && (
             <span className="text-muted" style={{ fontSize: '0.9em' }}>
-              Select at least 2 approved requests to generate batch RIS
+              Select at least 2 reviewed requests (approved or rejected) to generate batch RIS
             </span>
           )}
           {selectedForBatch.length >= 2 && (
@@ -201,7 +209,7 @@ const Requests = () => {
         <table className="data-table">
           <thead>
             <tr>
-              {filters.status === 'approved' && <th style={{ width: '50px' }}>Select</th>}
+              {showBatchSelect && <th style={{ width: '50px' }}>Select</th>}
               <th>Item</th>
               <th>Purpose</th>
               {isAdmin && <th>Requested By</th>}
@@ -212,7 +220,7 @@ const Requests = () => {
           <tbody>
             {requests.length === 0 ? (
               <tr>
-                <td colSpan={filters.status === 'approved' ? (isAdmin ? "6" : "5") : (isAdmin ? "5" : "4")} className="text-center">
+                <td colSpan={showBatchSelect ? (isAdmin ? "6" : "5") : (isAdmin ? "5" : "4")} className="text-center">
                   No requests found
                 </td>
               </tr>
@@ -235,14 +243,16 @@ const Requests = () => {
                 return (
                   <>
                     <tr key={request._id}>
-                      {filters.status === 'approved' && (
+                      {showBatchSelect && (
                         <td style={{ textAlign: 'center' }}>
-                          <input
-                            type="checkbox"
-                            checked={selectedForBatch.includes(request._id)}
-                            onChange={() => handleBatchCheckboxChange(request._id)}
-                            style={{ cursor: 'pointer', width: '18px', height: '18px' }}
-                          />
+                          {(request.status === 'approved' || request.status === 'rejected') ? (
+                            <input
+                              type="checkbox"
+                              checked={selectedForBatch.includes(request._id)}
+                              onChange={() => handleBatchCheckboxChange(request._id)}
+                              style={{ cursor: 'pointer', width: '18px', height: '18px' }}
+                            />
+                          ) : null}
                         </td>
                       )}
                       <td>
@@ -296,7 +306,7 @@ const Requests = () => {
                             )}
                           </>
                         )}
-                        {request.status === 'approved' && (
+                        {(request.status === 'approved' || request.status === 'rejected') && (
                           <>
                             <button
                               className="btn btn-icon btn-action-outline"

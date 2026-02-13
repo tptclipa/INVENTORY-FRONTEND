@@ -185,6 +185,7 @@ const Transactions = () => {
           <option value="">All Types</option>
           <option value="in">Stock In</option>
           <option value="out">Stock Out</option>
+          <option value="rejected">Rejected</option>
         </select>
         <input
           type="date"
@@ -215,7 +216,7 @@ const Transactions = () => {
               <th>Type</th>
               <th>Quantity</th>
               <th>Performed By</th>
-              <th>Notes</th>
+              <th>Remarks</th>
             </tr>
           </thead>
           <tbody>
@@ -233,10 +234,18 @@ const Transactions = () => {
                   <td>
                     <span
                       className={`badge ${
-                        transaction.type === 'in' ? 'badge-success' : 'badge-danger'
+                        transaction.type === 'in'
+                          ? 'badge-success'
+                          : transaction.type === 'out'
+                          ? 'badge-danger'
+                          : 'badge-warning'
                       }`}
                     >
-                      {transaction.type === 'in' ? 'Stock In' : 'Stock Out'}
+                      {transaction.type === 'in'
+                        ? 'Stock In'
+                        : transaction.type === 'out'
+                        ? 'Stock Out'
+                        : 'Rejected'}
                     </span>
                   </td>
                   <td>{transaction.quantity}</td>

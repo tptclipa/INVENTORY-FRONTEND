@@ -107,11 +107,11 @@ function AppRoutes() {
       <Route
         path="/transactions"
         element={
-          <ProtectedRoute>
+          <AdminRoute>
             <Layout>
               <Transactions />
             </Layout>
-          </ProtectedRoute>
+          </AdminRoute>
         }
       />
       <Route
