@@ -73,7 +73,8 @@ export const usersAPI = {
   update: (id, data) => api.put(`/users/${id}`, data),
   delete: (id) => api.delete(`/users/${id}`),
   changePassword: (id, data) => api.put(`/users/${id}/password`, data), // Admin only
-  changeOwnPassword: (data) => api.put('/users/me/password', data), // For logged-in user
+  sendChangePasswordCode: () => api.post('/users/me/password/send-code'), // Send verification code to email
+  changeOwnPassword: (data) => api.put('/users/me/password', data), // { code, password } — For logged-in user
 };
 
 // Items API

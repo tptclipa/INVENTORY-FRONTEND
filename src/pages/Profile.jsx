@@ -18,9 +18,11 @@ const Profile = () => {
   });
 
   const [passwordData, setPasswordData] = useState({
+    verificationCode: '',
     newPassword: '',
     confirmPassword: '',
   });
+  const [passwordStep, setPasswordStep] = useState('request'); // 'request' | 'verify'
 
   useEffect(() => {
     if (user) {
@@ -71,8 +73,27 @@ const Profile = () => {
     }
   };
 
+  const handleSendVerificationCode = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await usersAPI.sendChangePasswordCode();
+      setToast({ message: 'Verification code sent to your email', type: 'success' });
+      setPasswordStep('verify');
+    } catch (error) {
+      setToast({ message: error.message || 'Failed to send code', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
+
+    if (!passwordData.verificationCode.trim()) {
+      setToast({ message: 'Enter the verification code from your email', type: 'error' });
+      return;
+    }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       setToast({ message: 'Passwords do not match', type: 'error' });
@@ -88,12 +109,15 @@ const Profile = () => {
 
     try {
       await usersAPI.changeOwnPassword({
+        code: passwordData.verificationCode.trim(),
         password: passwordData.newPassword,
       });
       
       setToast({ message: 'Password changed successfully', type: 'success' });
       setActiveView('info');
+      setPasswordStep('request');
       setPasswordData({
+        verificationCode: '',
         newPassword: '',
         confirmPassword: '',
       });
@@ -115,7 +139,9 @@ const Profile = () => {
 
   const handleCancelPasswordChange = () => {
     setActiveView('info');
+    setPasswordStep('request');
     setPasswordData({
+      verificationCode: '',
       newPassword: '',
       confirmPassword: '',
     });
@@ -317,53 +343,80 @@ const Profile = () => {
                 <button className="profile-back-btn" onClick={() => setActiveView('info')}>×</button>
               </div>
               <div className="profile-form-container">
-                <form onSubmit={handlePasswordSubmit}>
-                  <div className="form-group">
-                    <label htmlFor="newPassword">New Password *</label>
-                    <input
-                      type="password"
-                      id="newPassword"
-                      name="newPassword"
-                      value={passwordData.newPassword}
-                      onChange={handlePasswordChange}
-                      required
-                      minLength={6}
-                      placeholder="Enter new password (min 6 characters)"
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="confirmPassword">Confirm Password *</label>
-                    <input
-                      type="password"
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      value={passwordData.confirmPassword}
-                      onChange={handlePasswordChange}
-                      required
-                      minLength={6}
-                      placeholder="Re-enter new password"
-                    />
-                  </div>
-
-                  <div className="form-actions">
-                    <button 
-                      type="button" 
-                      className="btn btn-secondary" 
-                      onClick={handleCancelPasswordChange}
+                {passwordStep === 'request' ? (
+                  <form onSubmit={handleSendVerificationCode}>
+                    <p className="profile-password-hint">
+                      We'll send a verification code to <strong>{user?.email}</strong>. Enter it in the next step to change your password.
+                    </p>
+                    <div className="form-actions">
+                      <button type="button" className="btn btn-secondary" onClick={handleCancelPasswordChange} disabled={loading}>
+                        Cancel
+                      </button>
+                      <button type="submit" className="btn btn-primary" disabled={loading}>
+                        {loading ? 'Sending...' : 'Send verification code'}
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <form onSubmit={handlePasswordSubmit}>
+                    <div className="form-group">
+                      <label htmlFor="verificationCode">Verification code *</label>
+                      <input
+                        type="text"
+                        id="verificationCode"
+                        name="verificationCode"
+                        value={passwordData.verificationCode}
+                        onChange={handlePasswordChange}
+                        required
+                        placeholder="Enter 6-digit code from email"
+                        maxLength={6}
+                        autoComplete="one-time-code"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="newPassword">New Password *</label>
+                      <input
+                        type="password"
+                        id="newPassword"
+                        name="newPassword"
+                        value={passwordData.newPassword}
+                        onChange={handlePasswordChange}
+                        required
+                        minLength={6}
+                        placeholder="Enter new password (min 6 characters)"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="confirmPassword">Confirm Password *</label>
+                      <input
+                        type="password"
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        value={passwordData.confirmPassword}
+                        onChange={handlePasswordChange}
+                        required
+                        minLength={6}
+                        placeholder="Re-enter new password"
+                      />
+                    </div>
+                    <div className="form-actions">
+                      <button type="button" className="btn btn-secondary" onClick={handleCancelPasswordChange} disabled={loading}>
+                        Cancel
+                      </button>
+                      <button type="submit" className="btn btn-primary" disabled={loading}>
+                        {loading ? 'Changing...' : 'Change Password'}
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn btn-link profile-resend-code"
+                      onClick={handleSendVerificationCode}
                       disabled={loading}
                     >
-                      Cancel
+                      Resend code
                     </button>
-                    <button 
-                      type="submit" 
-                      className="btn btn-primary"
-                      disabled={loading}
-                    >
-                      {loading ? 'Changing...' : 'Change Password'}
-                    </button>
-                  </div>
-                </form>
+                  </form>
+                )}
               </div>
             </>
           )}
