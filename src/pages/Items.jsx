@@ -19,6 +19,18 @@ const useIsMobile = () => {
   return isMobile;
 };
 
+const getInitialFiltersFromUrl = () => {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    search: '',
+    category: '',
+    lowStock: params.get('lowStock') === 'true' ? 'true' : '',
+  };
+};
+
+const getInitialShowFilters = () =>
+  new URLSearchParams(window.location.search).get('lowStock') === 'true';
+
 const Items = () => {
   const { isAdmin } = useAuth();
   const { addToCart } = useCart();
@@ -32,12 +44,8 @@ const Items = () => {
   const [addingToCartItem, setAddingToCartItem] = useState(null);
   const [restockingItem, setRestockingItem] = useState(null);
   const [toast, setToast] = useState(null);
-  const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({
-    search: '',
-    category: '',
-    lowStock: '',
-  });
+  const [showFilters, setShowFilters] = useState(getInitialShowFilters);
+  const [filters, setFilters] = useState(getInitialFiltersFromUrl);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -400,17 +408,19 @@ const Items = () => {
     <div className="container">
       <div className="page-header">
         <h2>{isAdmin ? 'Items Management' : 'View Items'}</h2>
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            className={`btn btn-secondary ${showFilters ? 'active' : ''}`}
-            onClick={() => setShowFilters(!showFilters)}
-            title={showFilters ? 'Hide filters' : 'Show filters'}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-          >
-            <MdFilterList size={20} />
-            Filters
-          </button>
+        <div className="page-header-actions">
+          {isMobile && (
+            <button
+              type="button"
+              className={`btn btn-secondary ${showFilters ? 'active' : ''}`}
+              onClick={() => setShowFilters(!showFilters)}
+              title={showFilters ? 'Hide filters' : 'Show filters'}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <MdFilterList size={20} />
+              Filters
+            </button>
+          )}
           {isAdmin && (
             <>
               <div className="report-menu-container" style={{ position: 'relative' }}>
@@ -482,37 +492,38 @@ const Items = () => {
         </div>
       </div>
 
-      {/* Search always visible */}
-      <div className="items-search-wrap">
-        <input
-          type="text"
-          name="search"
-          placeholder="Search by name, Stock No., or description..."
-          value={filters.search}
-          onChange={handleFilterChange}
-          className="items-search-input"
-          aria-label="Search items"
-        />
-      </div>
-
-      {showFilters && (
-        <div className="items-filters-panel">
-          <div className="filters">
-            <select name="category" value={filters.category} onChange={handleFilterChange}>
-              <option value="">All Categories</option>
-              {categories.map((cat) => (
-                <option key={cat._id} value={cat._id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-            <select name="lowStock" value={filters.lowStock} onChange={handleFilterChange}>
-              <option value="">All Stock Levels</option>
-              <option value="true">Low Stock Only</option>
-            </select>
-          </div>
+      {/* Search and filters on one row (desktop); stacked on mobile */}
+      <div className="items-search-filters-row">
+        <div className="items-search-wrap">
+          <input
+            type="text"
+            name="search"
+            placeholder="Search by name, Stock No., or description..."
+            value={filters.search}
+            onChange={handleFilterChange}
+            className="items-search-input"
+            aria-label="Search items"
+          />
         </div>
-      )}
+        {(showFilters || !isMobile) && (
+          <div className="items-filters-panel">
+            <div className="filters">
+              <select name="category" value={filters.category} onChange={handleFilterChange}>
+                <option value="">All Categories</option>
+                {categories.map((cat) => (
+                  <option key={cat._id} value={cat._id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+              <select name="lowStock" value={filters.lowStock} onChange={handleFilterChange}>
+                <option value="">All Stock Levels</option>
+                <option value="true">Low Stock Only</option>
+              </select>
+            </div>
+          </div>
+        )}
+      </div>
 
       {isMobile ? (
         <div className="items-card-list">

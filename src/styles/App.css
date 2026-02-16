@@ -912,6 +912,17 @@ body {
   font-size: 24px;
   font-weight: 600;
   transition: color 0.3s ease;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.page-header-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
 }
 
 .page-header-title-row {
@@ -1599,10 +1610,58 @@ body {
   margin-bottom: 0;
 }
 
-/* Items page: collapsible filters panel */
+/* Items page: search and filters on one row (desktop) */
+.items-search-filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.items-search-filters-row .items-search-wrap {
+  margin-bottom: 0;
+  flex: 0 1 auto;
+  min-width: 200px;
+  max-width: 320px;
+}
+
+.items-search-filters-row .items-filters-panel {
+  margin-bottom: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+.items-search-filters-row .items-filters-panel .filters {
+  margin-bottom: 0;
+  width: auto;
+}
+
+@media (max-width: 768px) {
+  .items-search-filters-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .items-search-filters-row .items-search-wrap {
+    max-width: none;
+  }
+  .items-search-filters-row .items-filters-panel {
+    padding: 16px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+  }
+  .items-search-filters-row .items-filters-panel .filters {
+    width: 100%;
+  }
+}
+
+/* Items page: collapsible filters panel (when stacked / mobile) */
 .items-filters-panel {
   margin-bottom: 20px;
-  padding: 16px;
+  padding: 16px 0;
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
   border-radius: 10px;
@@ -1610,6 +1669,7 @@ body {
 
 .items-filters-panel .filters {
   margin-bottom: 0;
+  width: 100%;
 }
 
 /* Items page: search always visible (not inside collapsible filters) */
@@ -2373,13 +2433,14 @@ td.action-buttons.menu-active {
     overflow-x: hidden;
   }
 
-  /* Dashboard: tighter layout on mobile */
+  /* Dashboard: tighter layout on mobile, 2x2 card grid */
   .dashboard-welcome-card {
     margin-bottom: 16px;
     border-radius: 12px;
   }
 
   .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     margin-bottom: 20px;
   }
@@ -2432,13 +2493,14 @@ td.action-buttons.menu-active {
     align-items: stretch;
   }
 
+  .page-header-actions,
   .page-header > div {
-    display: flex;
     flex-wrap: wrap;
-    gap: 10px;
     width: 100%;
+    justify-content: flex-end;
   }
 
+  .page-header-actions .btn,
   .page-header > div .btn {
     flex: 1 1 140px;
     min-width: 0;
@@ -2512,6 +2574,7 @@ td.action-buttons.menu-active {
   }
 
   .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
     gap: 10px;
     margin-bottom: 16px;
   }
