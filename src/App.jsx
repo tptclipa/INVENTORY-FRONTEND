@@ -21,7 +21,7 @@ import './styles/App.css';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, loggingOut } = useAuth();
 
   if (loading) {
     return (
@@ -32,18 +32,36 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
+  if (loggingOut) {
+    return (
+      <div className="loading">
+        <div className="loading-spinner" aria-hidden="true" />
+        <span className="loading-text">Logging out...</span>
+      </div>
+    );
+  }
+
   return isAuthenticated ? children : <Navigate to="/" replace />;
 };
 
 // Admin Only Route Component
 const AdminRoute = ({ children }) => {
-  const { isAuthenticated, isAdmin, loading } = useAuth();
+  const { isAuthenticated, isAdmin, loading, loggingOut } = useAuth();
 
   if (loading) {
     return (
       <div className="loading">
         <div className="loading-spinner" aria-hidden="true" />
         <span className="loading-text">Loading...</span>
+      </div>
+    );
+  }
+
+  if (loggingOut) {
+    return (
+      <div className="loading">
+        <div className="loading-spinner" aria-hidden="true" />
+        <span className="loading-text">Logging out...</span>
       </div>
     );
   }

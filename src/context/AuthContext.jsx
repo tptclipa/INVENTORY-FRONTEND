@@ -14,6 +14,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     // Check if user is logged in
@@ -107,6 +108,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    setLoggingOut(true);
     try {
       // Call backend to log the logout activity
       await authAPI.logout();
@@ -117,12 +119,14 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       setUser(null);
+      setLoggingOut(false);
     }
   };
 
   const value = {
     user,
     loading,
+    loggingOut,
     login,
     register,
     logout,
