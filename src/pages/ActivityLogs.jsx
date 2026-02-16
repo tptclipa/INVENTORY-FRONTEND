@@ -271,7 +271,10 @@ const ActivityLogs = () => {
             {loading ? (
               <tr>
                 <td colSpan={isAdmin ? 5 : 4} className="text-center">
-                  Loading...
+                  <div className="loading-inline loading-inline-center">
+                    <div className="loading-spinner" aria-hidden="true" />
+                    <span>Loading...</span>
+                  </div>
                 </td>
               </tr>
             ) : logs.length === 0 ? (

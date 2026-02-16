@@ -24,7 +24,12 @@ const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
-    return <div className="loading">Loading...</div>;
+    return (
+      <div className="loading">
+        <div className="loading-spinner" aria-hidden="true" />
+        <span className="loading-text">Loading...</span>
+      </div>
+    );
   }
 
   return isAuthenticated ? children : <Navigate to="/" replace />;
@@ -35,7 +40,12 @@ const AdminRoute = ({ children }) => {
   const { isAuthenticated, isAdmin, loading } = useAuth();
 
   if (loading) {
-    return <div className="loading">Loading...</div>;
+    return (
+      <div className="loading">
+        <div className="loading-spinner" aria-hidden="true" />
+        <span className="loading-text">Loading...</span>
+      </div>
+    );
   }
 
   if (!isAuthenticated) {

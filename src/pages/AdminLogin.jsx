@@ -9,6 +9,7 @@ const AdminLogin = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -19,6 +20,7 @@ const AdminLogin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
     try {
       // Call a special admin login endpoint with just password
@@ -34,6 +36,7 @@ const AdminLogin = () => {
       }
     } catch (err) {
       setError(err.message || 'Invalid admin password');
+      setLoading(false);
     }
   };
 
@@ -76,8 +79,15 @@ const AdminLogin = () => {
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary">
-              Access Admin Panel
+            <button type="submit" className="btn btn-primary btn-loading-wrap" disabled={loading}>
+              {loading ? (
+                <>
+                  <span className="btn-loading-spinner" aria-hidden="true" />
+                  Accessing...
+                </>
+              ) : (
+                'Access Admin Panel'
+              )}
             </button>
             </form>
 

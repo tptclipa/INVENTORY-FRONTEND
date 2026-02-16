@@ -201,7 +201,10 @@ const Users = () => {
             {loading ? (
               <tr>
                 <td colSpan="6" className="text-center">
-                  Loading...
+                  <div className="loading-inline loading-inline-center">
+                    <div className="loading-spinner" aria-hidden="true" />
+                    <span>Loading...</span>
+                  </div>
                 </td>
               </tr>
             ) : users.length === 0 ? (

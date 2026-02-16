@@ -62,13 +62,85 @@ body {
   flex-direction: column;
 }
 
+/* Loading animation */
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loading-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes loading-dots {
+  0%, 20% {
+    content: '.';
+  }
+  40% {
+    content: '..';
+  }
+  60%, 100% {
+    content: '...';
+  }
+}
+
 .loading {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 1.25rem;
   min-height: 100vh;
-  font-size: 24px;
+  font-size: 1.125rem;
   color: white;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(255, 255, 255, 0.25);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: loading-spin 0.9s linear infinite;
+}
+
+.loading-text {
+  animation: loading-pulse 1.4s ease-in-out infinite;
+  letter-spacing: 0.05em;
+}
+
+/* Inline/table loading spinner (smaller) */
+.loading-inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: var(--text-muted);
+}
+
+.loading-inline.loading-inline-center {
+  width: 100%;
+  justify-content: center;
+}
+
+.loading-inline .loading-spinner {
+  width: 24px;
+  height: 24px;
+  border-width: 3px;
+  border-color: rgba(0, 58, 153, 0.2);
+  border-top-color: var(--primary-blue);
+}
+
+.dark-mode .loading-inline .loading-spinner {
+  border-color: rgba(255, 255, 255, 0.15);
+  border-top-color: var(--accent-white);
 }
 
 /* Login Page Styles */
@@ -328,6 +400,33 @@ body {
   background: var(--primary-blue-light);
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(0, 71, 187, 0.4);
+}
+
+/* Button loading state */
+.btn-loading-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-loading-wrap:disabled {
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.btn-loading-wrap:disabled:hover {
+  transform: none;
+}
+
+.btn-loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: white;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: loading-spin 0.9s linear infinite;
 }
 
 .btn-secondary {
