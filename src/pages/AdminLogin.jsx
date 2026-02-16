@@ -10,6 +10,7 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { setLoggingIn } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -21,6 +22,7 @@ const AdminLogin = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
+    setLoggingIn(true);
 
     try {
       // Call a special admin login endpoint with just password
@@ -37,6 +39,7 @@ const AdminLogin = () => {
     } catch (err) {
       setError(err.message || 'Invalid admin password');
       setLoading(false);
+      setLoggingIn(false);
     }
   };
 

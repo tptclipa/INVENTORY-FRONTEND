@@ -19,24 +19,29 @@ import Profile from './pages/Profile';
 import Layout from './components/Layout';
 import './styles/App.css';
 
+// Global overlay for login/logout so it appears on top of the login page
+const AuthLoadingOverlay = () => {
+  const { loggingIn, loggingOut } = useAuth();
+  if (!loggingIn && !loggingOut) return null;
+  return (
+    <div className="loading-overlay" role="status" aria-live="polite">
+      <div className="loading-spinner" aria-hidden="true" />
+      <span className="loading-text">
+        {loggingOut ? 'Logging out...' : 'Logging in...'}
+      </span>
+    </div>
+  );
+};
+
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading, loggingOut } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
     return (
       <div className="loading">
         <div className="loading-spinner" aria-hidden="true" />
         <span className="loading-text">Loading...</span>
-      </div>
-    );
-  }
-
-  if (loggingOut) {
-    return (
-      <div className="loading">
-        <div className="loading-spinner" aria-hidden="true" />
-        <span className="loading-text">Logging out...</span>
       </div>
     );
   }
@@ -46,22 +51,13 @@ const ProtectedRoute = ({ children }) => {
 
 // Admin Only Route Component
 const AdminRoute = ({ children }) => {
-  const { isAuthenticated, isAdmin, loading, loggingOut } = useAuth();
+  const { isAuthenticated, isAdmin, loading } = useAuth();
 
   if (loading) {
     return (
       <div className="loading">
         <div className="loading-spinner" aria-hidden="true" />
         <span className="loading-text">Loading...</span>
-      </div>
-    );
-  }
-
-  if (loggingOut) {
-    return (
-      <div className="loading">
-        <div className="loading-spinner" aria-hidden="true" />
-        <span className="loading-text">Logging out...</span>
       </div>
     );
   }
@@ -202,6 +198,7 @@ function App() {
       <ThemeProvider>
         <AuthProvider>
           <CartProvider>
+            <AuthLoadingOverlay />
             <AppRoutes />
           </CartProvider>
         </AuthProvider>

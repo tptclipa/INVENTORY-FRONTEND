@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [loggingIn, setLoggingIn] = useState(false);
 
   useEffect(() => {
     // Check if user is logged in
@@ -28,6 +29,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (credentials) => {
+    setLoggingIn(true);
     try {
       const response = await authAPI.login(credentials);
       const { token, ...userData } = response.data;
@@ -39,10 +41,13 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       return { success: false, message: error.message || 'Login failed' };
+    } finally {
+      setLoggingIn(false);
     }
   };
 
   const register = async (userData) => {
+    setLoggingIn(true);
     try {
       const response = await authAPI.register(userData);
       // New flow: registration returns success with email, not token
@@ -53,6 +58,8 @@ export const AuthProvider = ({ children }) => {
       };
     } catch (error) {
       return { success: false, message: error.message || 'Registration failed' };
+    } finally {
+      setLoggingIn(false);
     }
   };
 
@@ -119,7 +126,8 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       setUser(null);
-      setLoggingOut(false);
+      // Keep overlay visible briefly so "Logging out..." appears on top of login page after redirect
+      setTimeout(() => setLoggingOut(false), 500);
     }
   };
 
@@ -127,6 +135,8 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     loggingOut,
+    loggingIn,
+    setLoggingIn,
     login,
     register,
     logout,
