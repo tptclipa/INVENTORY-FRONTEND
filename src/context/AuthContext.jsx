@@ -126,8 +126,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       setUser(null);
-      // Keep overlay visible briefly so "Logging out..." appears on top of login page after redirect
-      setTimeout(() => setLoggingOut(false), 500);
+      setLoggingOut(false);
     }
   };
 
