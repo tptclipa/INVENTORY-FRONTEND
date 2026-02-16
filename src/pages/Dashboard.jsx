@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { itemsAPI, categoriesAPI, transactionsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Toast from '../components/Toast';
+import { MdCalendarToday, MdSchedule, MdInventory2, MdCategory, MdWarning, MdSwapHoriz, MdArrowForward } from 'react-icons/md';
 
 const Dashboard = () => {
   const { user, isAdmin } = useAuth();
@@ -94,30 +96,57 @@ const Dashboard = () => {
           <p className="welcome-subtitle">{getSubtitle()}</p>
         </div>
         <div className="datetime-display">
-          <div className="date-part">{formatDate()}</div>
-          <div className="time-part">{formatTime()}</div>
+          <div className="datetime-icon-wrap">
+            <MdCalendarToday className="datetime-icon" aria-hidden />
+            <span className="date-part">{formatDate()}</span>
+          </div>
+          <div className="datetime-icon-wrap">
+            <MdSchedule className="datetime-icon" aria-hidden />
+            <span className="time-part">{formatTime()}</span>
+          </div>
         </div>
       </div>
 
       <div className="dashboard-grid">
-        <div className="stat-card">
-          <h3>Total Items</h3>
-          <p className="stat-value">{stats.totalItems}</p>
+        <div className="stat-card stat-card-items">
+          <div className="stat-card-icon" aria-hidden>
+            <MdInventory2 size={28} />
+          </div>
+          <div className="stat-card-body">
+            <h3>Total Items</h3>
+            <p className="stat-value">{stats.totalItems}</p>
+          </div>
         </div>
 
-        <div className="stat-card">
-          <h3>Total Categories</h3>
-          <p className="stat-value">{stats.totalCategories}</p>
+        <div className="stat-card stat-card-categories">
+          <div className="stat-card-icon" aria-hidden>
+            <MdCategory size={28} />
+          </div>
+          <div className="stat-card-body">
+            <h3>Total Categories</h3>
+            <p className="stat-value">{stats.totalCategories}</p>
+          </div>
         </div>
 
-        <div className="stat-card warning">
-          <h3>Low Stock Items</h3>
-          <p className="stat-value">{stats.lowStockCount}</p>
-        </div>
+        <Link to="/items?lowStock=true" className="stat-card warning stat-card-action">
+          <div className="stat-card-icon" aria-hidden>
+            <MdWarning size={28} />
+          </div>
+          <div className="stat-card-body">
+            <h3>Low Stock Items</h3>
+            <p className="stat-value">{stats.lowStockCount}</p>
+            <span className="stat-card-cta">View <MdArrowForward size={16} /></span>
+          </div>
+        </Link>
 
-        <div className="stat-card">
-          <h3>{isAdmin ? 'Total Transactions' : 'My Transactions'}</h3>
-          <p className="stat-value">{stats.totalTransactions}</p>
+        <div className="stat-card stat-card-transactions">
+          <div className="stat-card-icon" aria-hidden>
+            <MdSwapHoriz size={28} />
+          </div>
+          <div className="stat-card-body">
+            <h3>{isAdmin ? 'Total Transactions' : 'My Transactions'}</h3>
+            <p className="stat-value">{stats.totalTransactions}</p>
+          </div>
         </div>
       </div>
 

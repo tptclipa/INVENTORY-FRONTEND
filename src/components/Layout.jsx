@@ -1,21 +1,48 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
 import { LiaCopyright } from 'react-icons/lia';
-import { MdDashboard, MdInventory, MdCategory, MdSwapHoriz, MdLogout, MdAssignment, MdShoppingCart, MdDarkMode, MdLightMode, MdPeople, MdHistory, MdAccountCircle } from 'react-icons/md';
+import { MdDashboard, MdInventory, MdCategory, MdSwapHoriz, MdAssignment, MdShoppingCart, MdDarkMode, MdLightMode, MdPeople, MdHistory, MdAccountCircle, MdMenu } from 'react-icons/md';
 
 const Layout = ({ children }) => {
   const { user, logout, isAdmin } = useAuth();
   const { getCartTotal } = useCart();
   const { isDarkMode, toggleTheme } = useTheme();
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isActive = (path) => location.pathname === path;
   const cartTotal = getCartTotal();
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  // Close mobile menu on Escape
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') setMobileMenuOpen(false);
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, []);
+
   return (
-    <div className="app-layout-sidebar">
+    <div className={`app-layout-sidebar ${mobileMenuOpen ? 'mobile-nav-open' : ''}`}>
+      {/* Backdrop when mobile menu is open */}
+      {mobileMenuOpen && (
+        <div
+          className="sidebar-backdrop"
+          onClick={() => setMobileMenuOpen(false)}
+          onKeyDown={(e) => e.key === 'Enter' && setMobileMenuOpen(false)}
+          role="button"
+          tabIndex={0}
+          aria-label="Close menu"
+        />
+      )}
       {/* Side Navigation */}
       <aside className="sidebar">
         <div className="sidebar-header">
@@ -100,6 +127,22 @@ const Layout = ({ children }) => {
 
       {/* Main Content Area */}
       <div className="main-wrapper">
+        <div className="app-top-banner">
+          <button
+            type="button"
+            className="mobile-menu-toggle"
+            onClick={() => setMobileMenuOpen(true)}
+            aria-label="Open menu"
+            aria-expanded={mobileMenuOpen}
+          >
+            <MdMenu size={24} />
+          </button>
+          <img
+            src="/tesda name logo.png"
+            alt="TESDA"
+            className="app-top-banner-logo"
+          />
+        </div>
         <main className="main-content-sidebar">
           {children}
         </main>

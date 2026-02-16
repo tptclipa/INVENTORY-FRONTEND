@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { activityLogsAPI, usersAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Toast from '../components/Toast';
-import { MdRefresh, MdClear, MdChevronLeft, MdChevronRight } from 'react-icons/md';
+import { MdRefresh, MdClear, MdChevronLeft, MdChevronRight, MdFilterList } from 'react-icons/md';
 
 const ActivityLogs = () => {
   const { isAdmin } = useAuth();
@@ -12,6 +12,7 @@ const ActivityLogs = () => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     action: '',
     userId: '',
@@ -123,21 +124,6 @@ const ActivityLogs = () => {
     return 'badge-info';
   };
 
-  const calculateTimeRemaining = (expiresAt) => {
-    const now = new Date();
-    const expiry = new Date(expiresAt);
-    const diff = expiry - now;
-    
-    if (diff <= 0) return 'Expired';
-    
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    
-    if (days > 0) return `${days} day${days > 1 ? 's' : ''} remaining`;
-    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} remaining`;
-    return 'Less than 1 hour';
-  };
-
   // Pagination calculations
   const totalPages = Math.ceil(logs.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -194,8 +180,19 @@ const ActivityLogs = () => {
       <div className="page-header">
         <h2>{isAdmin ? 'Activity Logs' : 'My Activity Logs'}</h2>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button 
-            className="btn-icon-header btn-icon-secondary" 
+          <button
+            type="button"
+            className={`btn btn-secondary ${showFilters ? 'active' : ''}`}
+            onClick={() => setShowFilters(!showFilters)}
+            title={showFilters ? 'Hide filters' : 'Show filters'}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <MdFilterList size={20} />
+            Filters
+          </button>
+          <button
+            type="button"
+            className="btn-icon-header btn-icon-secondary"
             onClick={handleRefresh}
             title="Refresh"
           >
@@ -204,73 +201,77 @@ const ActivityLogs = () => {
         </div>
       </div>
 
-      <div className="filters">
-        <select name="action" value={filters.action} onChange={handleFilterChange}>
-          <option value="">All Actions</option>
-          <option value="login">Login</option>
-          <option value="logout">Logout</option>
-          <option value="create_item">Create Item</option>
-          <option value="update_item">Update Item</option>
-          <option value="delete_item">Delete Item</option>
-          <option value="create_transaction">Create Transaction</option>
-          <option value="create_request">Create Request</option>
-          <option value="approve_request">Approve Request</option>
-          <option value="reject_request">Reject Request</option>
-          <option value="generate_report">Generate Report</option>
-          <option value="export_data">Export Data</option>
-        </select>
+      {showFilters && (
+        <div className="activity-logs-filters-panel">
+          <div className="filters">
+            <select name="action" value={filters.action} onChange={handleFilterChange}>
+              <option value="">All Actions</option>
+              <option value="login">Login</option>
+              <option value="logout">Logout</option>
+              <option value="create_item">Create Item</option>
+              <option value="update_item">Update Item</option>
+              <option value="delete_item">Delete Item</option>
+              <option value="create_transaction">Create Transaction</option>
+              <option value="create_request">Create Request</option>
+              <option value="approve_request">Approve Request</option>
+              <option value="reject_request">Reject Request</option>
+              <option value="generate_report">Generate Report</option>
+              <option value="export_data">Export Data</option>
+            </select>
 
-        {isAdmin && (
-          <select name="userId" value={filters.userId} onChange={handleFilterChange}>
-            <option value="">All Users</option>
-            {users.length > 0 ? (
-              users.map((user) => (
-                <option key={user._id} value={user._id}>
-                  {user.username} ({user.name}) - {user.role}
-                </option>
-              ))
-            ) : (
-              <option value="" disabled>Loading users...</option>
+            {isAdmin && (
+              <select name="userId" value={filters.userId} onChange={handleFilterChange}>
+                <option value="">All Users</option>
+                {users.length > 0 ? (
+                  users.map((user) => (
+                    <option key={user._id} value={user._id}>
+                      {user.username} ({user.name}) - {user.role}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>Loading users...</option>
+                )}
+              </select>
             )}
-          </select>
-        )}
 
-        <input
-          type="date"
-          name="startDate"
-          value={filters.startDate}
-          onChange={handleFilterChange}
-          placeholder="Start Date"
-        />
-        
-        <input
-          type="date"
-          name="endDate"
-          value={filters.endDate}
-          onChange={handleFilterChange}
-          placeholder="End Date"
-        />
-        
-        <button className="btn btn-secondary" onClick={handleClearFilters}>
-          Clear
-        </button>
-      </div>
+            <input
+              type="date"
+              name="startDate"
+              value={filters.startDate}
+              onChange={handleFilterChange}
+              placeholder="Start Date"
+            />
 
-      <div className="table-container">
-        <table className="data-table">
+            <input
+              type="date"
+              name="endDate"
+              value={filters.endDate}
+              onChange={handleFilterChange}
+              placeholder="End Date"
+            />
+
+            <button type="button" className="btn btn-secondary" onClick={handleClearFilters}>
+              <MdClear size={18} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="table-container activity-logs-table-wrap">
+        <table className="data-table activity-logs-table">
           <thead>
             <tr>
-              <th>Date & Time</th>
-              {isAdmin && <th>User</th>}
-              <th>Action</th>
-              <th>Details</th>
-              <th>Expires</th>
+              <th className="activity-logs-th-date">Date & Time</th>
+              {isAdmin && <th className="activity-logs-th-user">User</th>}
+              <th className="activity-logs-th-action">Action</th>
+              <th className="activity-logs-th-details">Details</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={isAdmin ? 5 : 4} className="text-center">
+                <td colSpan={isAdmin ? 4 : 3} className="text-center">
                   <div className="loading-inline loading-inline-center">
                     <div className="loading-spinner" aria-hidden="true" />
                     <span>Loading...</span>
@@ -279,40 +280,31 @@ const ActivityLogs = () => {
               </tr>
             ) : logs.length === 0 ? (
               <tr>
-                <td colSpan={isAdmin ? 5 : 4} className="text-center">
+                <td colSpan={isAdmin ? 4 : 3} className="text-center">
                   No activity logs found
                 </td>
               </tr>
             ) : (
               currentLogs.map((log) => (
                 <tr key={log._id}>
-                  <td>{formatDate(log.createdAt)}</td>
+                  <td className="activity-logs-td-date">{formatDate(log.createdAt)}</td>
                   {isAdmin && (
-                    <td>
+                    <td className="activity-logs-td-user">
                       <strong>{log.user?.username || 'Unknown'}</strong>
                       {log.user?.name && (
-                        <small style={{ display: 'block', color: '#666' }}>
+                        <small className="activity-logs-user-name">
                           {log.user.name}
                         </small>
                       )}
                     </td>
                   )}
-                  <td>
+                  <td className="activity-logs-td-action">
                     <span className={`badge ${getActionBadgeClass(log.action)}`}>
                       {formatAction(log.action)}
                     </span>
                   </td>
-                  <td>
-                    <div style={{ maxWidth: '400px' }}>
-                      {log.details}
-                    </div>
-                  </td>
-                  <td>
-                    <small style={{ 
-                      color: new Date(log.expiresAt) - new Date() < 3 * 24 * 60 * 60 * 1000 ? '#ff9800' : '#666' 
-                    }}>
-                      {calculateTimeRemaining(log.expiresAt)}
-                    </small>
+                  <td className="activity-logs-td-details">
+                    {log.details}
                   </td>
                 </tr>
               ))

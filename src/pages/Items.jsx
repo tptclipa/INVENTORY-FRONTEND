@@ -4,12 +4,25 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import Modal from '../components/Modal';
 import Toast from '../components/Toast';
-import { MdAddShoppingCart, MdFileDownload, MdPrint, MdTableChart, MdEdit, MdDelete, MdAdd, MdMoreVert } from 'react-icons/md';
+import { MdAddShoppingCart, MdFileDownload, MdPrint, MdTableChart, MdEdit, MdDelete, MdAdd, MdMoreVert, MdFilterList } from 'react-icons/md';
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
+
+const MOBILE_BREAKPOINT = 768;
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth <= MOBILE_BREAKPOINT);
+  useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`);
+    const handler = () => setIsMobile(mql.matches);
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
+  }, []);
+  return isMobile;
+};
 
 const Items = () => {
   const { isAdmin } = useAuth();
   const { addToCart } = useCart();
+  const isMobile = useIsMobile();
   const [items, setItems] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -19,6 +32,7 @@ const Items = () => {
   const [addingToCartItem, setAddingToCartItem] = useState(null);
   const [restockingItem, setRestockingItem] = useState(null);
   const [toast, setToast] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     search: '',
     category: '',
@@ -356,6 +370,13 @@ const Items = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = items.slice(indexOfFirstItem, indexOfLastItem);
 
+  // Show at most 3 page dots (window around current page)
+  const getVisiblePageNumbers = () => {
+    if (totalPages <= 3) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    const startPage = Math.max(1, Math.min(currentPage - 1, totalPages - 2));
+    return [startPage, startPage + 1, startPage + 2];
+  };
+
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
     setActiveItemMenu(null); // Close any open menus when changing page
@@ -379,7 +400,17 @@ const Items = () => {
     <div className="container">
       <div className="page-header">
         <h2>{isAdmin ? 'Items Management' : 'View Items'}</h2>
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            className={`btn btn-secondary ${showFilters ? 'active' : ''}`}
+            onClick={() => setShowFilters(!showFilters)}
+            title={showFilters ? 'Hide filters' : 'Show filters'}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <MdFilterList size={20} />
+            Filters
+          </button>
           {isAdmin && (
             <>
               <div className="report-menu-container" style={{ position: 'relative' }}>
@@ -451,134 +482,247 @@ const Items = () => {
         </div>
       </div>
 
-      <div className="filters">
+      {/* Search always visible */}
+      <div className="items-search-wrap">
         <input
           type="text"
           name="search"
           placeholder="Search by name, Stock No., or description..."
           value={filters.search}
           onChange={handleFilterChange}
+          className="items-search-input"
+          aria-label="Search items"
         />
-        <select name="category" value={filters.category} onChange={handleFilterChange}>
-          <option value="">All Categories</option>
-          {categories.map((cat) => (
-            <option key={cat._id} value={cat._id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-        <select name="lowStock" value={filters.lowStock} onChange={handleFilterChange}>
-          <option value="">All Stock Levels</option>
-          <option value="true">Low Stock Only</option>
-        </select>
       </div>
 
-      <div className="table-container" style={{ position: 'relative' }}>
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Stock No.</th>
-              <th>Category</th>
-              <th>Quantity</th>
-              <th>Min Stock</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.length === 0 ? (
-              <tr>
-                <td colSpan="6" className="text-center">
-                  No items found
-                </td>
-              </tr>
-            ) : (
-              currentItems.map((item) => {
-                const isLowStock = item.quantity <= item.minStockLevel;
-                return (
-                  <tr key={item._id} className={`${isLowStock ? 'low-stock-row' : ''} ${activeItemMenu === item._id ? 'row-menu-active' : ''}`}>
-                    <td>{item.name}</td>
-                    <td>{item.sku || 'N/A'}</td>
-                    <td>{item.category?.name || 'N/A'}</td>
-                    <td>
-                      {item.quantity} {item.unit || 'pcs'}{' '}
+      {showFilters && (
+        <div className="items-filters-panel">
+          <div className="filters">
+            <select name="category" value={filters.category} onChange={handleFilterChange}>
+              <option value="">All Categories</option>
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat._id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+            <select name="lowStock" value={filters.lowStock} onChange={handleFilterChange}>
+              <option value="">All Stock Levels</option>
+              <option value="true">Low Stock Only</option>
+            </select>
+          </div>
+        </div>
+      )}
+
+      {isMobile ? (
+        <div className="items-card-list">
+          {items.length === 0 ? (
+            <p className="items-card-empty">No items found</p>
+          ) : (
+            currentItems.map((item) => {
+              const isLowStock = item.quantity <= item.minStockLevel;
+              return (
+                <div
+                  key={item._id}
+                  className={`item-card ${isLowStock ? 'item-card-low-stock' : ''} ${activeItemMenu === item._id ? 'item-card-menu-open' : ''}`}
+                >
+                  <div className="item-card-main">
+                    <div className="item-card-header">
+                      <h3 className="item-card-name">{item.name}</h3>
                       {isLowStock && <span className="badge badge-warning">Low</span>}
-                    </td>
-                    <td>{item.minStockLevel}</td>
-                    <td className={`action-buttons ${activeItemMenu === item._id ? 'menu-active' : ''}`}>
-                      {isAdmin ? (
-                        <div style={{ display: 'flex', gap: '5px', alignItems: 'center', position: 'relative' }}>
-                          <button 
-                            className="btn btn-primary btn-icon" 
-                            onClick={() => handleRestockClick(item._id)}
-                            title="Restock"
-                          >
-                            <MdAdd size={18} />
-                          </button>
-                          <div className="item-menu-container">
-                            <button 
-                              className="btn btn-secondary btn-icon" 
-                              onClick={() => setActiveItemMenu(activeItemMenu === item._id ? null : item._id)}
-                              title="More options"
-                            >
-                              <MdMoreVert size={18} />
-                            </button>
-                            {activeItemMenu === item._id && (
-                              <div className="dropdown-menu">
-                                <button
-                                  onClick={() => {
-                                    handleEditItem(item._id);
-                                    setActiveItemMenu(null);
-                                  }}
-                                  className="dropdown-menu-item"
-                                >
-                                  <MdEdit size={18} />
-                                  Edit
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    handleGenerateItemLabel(item._id);
-                                    setActiveItemMenu(null);
-                                  }}
-                                  className="dropdown-menu-item"
-                                >
-                                  <MdPrint size={18} />
-                                  Print Label
-                                </button>
-                                <div className="dropdown-menu-divider" />
-                                <button
-                                  onClick={() => {
-                                    handleDeleteItem(item._id);
-                                    setActiveItemMenu(null);
-                                  }}
-                                  className="dropdown-menu-item"
-                                  style={{ color: '#e74c3c' }}
-                                >
-                                  <MdDelete size={18} />
-                                  Delete
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ) : (
-                        <button 
-                          className="btn btn-icon btn-primary" 
-                          onClick={() => handleAddToCartClick(item)}
-                          title="Add to cart"
-                          disabled={item.quantity === 0}
+                    </div>
+                    <dl className="item-card-details">
+                      <div className="item-card-row">
+                        <dt>Stock No.</dt>
+                        <dd>{item.sku || 'N/A'}</dd>
+                      </div>
+                      <div className="item-card-row">
+                        <dt>Category</dt>
+                        <dd>{item.category?.name || 'N/A'}</dd>
+                      </div>
+                      <div className="item-card-row">
+                        <dt>Quantity</dt>
+                        <dd>{item.quantity} {item.unit || 'pcs'}</dd>
+                      </div>
+                      <div className="item-card-row">
+                        <dt>Min Stock</dt>
+                        <dd>{item.minStockLevel}</dd>
+                      </div>
+                    </dl>
+                  </div>
+                  <div className={`item-card-actions ${activeItemMenu === item._id ? 'menu-active' : ''}`}>
+                    {isAdmin ? (
+                      <>
+                        <button
+                          type="button"
+                          className="btn btn-primary btn-icon"
+                          onClick={() => handleRestockClick(item._id)}
+                          title="Restock"
                         >
-                          <MdAddShoppingCart size={20} />
+                          <MdAdd size={20} />
                         </button>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+                        <div className="item-menu-container">
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-icon"
+                            onClick={() => setActiveItemMenu(activeItemMenu === item._id ? null : item._id)}
+                            title="More options"
+                          >
+                            <MdMoreVert size={20} />
+                          </button>
+                          {activeItemMenu === item._id && (
+                            <div className="dropdown-menu dropdown-menu-card">
+                              <button
+                                type="button"
+                                onClick={() => { handleEditItem(item._id); setActiveItemMenu(null); }}
+                                className="dropdown-menu-item"
+                              >
+                                <MdEdit size={18} /> Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => { handleGenerateItemLabel(item._id); setActiveItemMenu(null); }}
+                                className="dropdown-menu-item"
+                              >
+                                <MdPrint size={18} /> Print Label
+                              </button>
+                              <div className="dropdown-menu-divider" />
+                              <button
+                                type="button"
+                                onClick={() => { handleDeleteItem(item._id); setActiveItemMenu(null); }}
+                                className="dropdown-menu-item dropdown-menu-item-danger"
+                              >
+                                <MdDelete size={18} /> Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-icon"
+                        onClick={() => handleAddToCartClick(item)}
+                        title="Add to cart"
+                        disabled={item.quantity === 0}
+                      >
+                        <MdAddShoppingCart size={20} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      ) : (
+        <div className="table-container" style={{ position: 'relative' }}>
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Stock No.</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Min Stock</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="text-center">
+                    No items found
+                  </td>
+                </tr>
+              ) : (
+                currentItems.map((item) => {
+                  const isLowStock = item.quantity <= item.minStockLevel;
+                  return (
+                    <tr key={item._id} className={`${isLowStock ? 'low-stock-row' : ''} ${activeItemMenu === item._id ? 'row-menu-active' : ''}`}>
+                      <td>{item.name}</td>
+                      <td>{item.sku || 'N/A'}</td>
+                      <td>{item.category?.name || 'N/A'}</td>
+                      <td>
+                        {item.quantity} {item.unit || 'pcs'}{' '}
+                        {isLowStock && <span className="badge badge-warning">Low</span>}
+                      </td>
+                      <td>{item.minStockLevel}</td>
+                      <td className={`action-buttons ${activeItemMenu === item._id ? 'menu-active' : ''}`}>
+                        {isAdmin ? (
+                          <div style={{ display: 'flex', gap: '5px', alignItems: 'center', position: 'relative' }}>
+                            <button 
+                              className="btn btn-primary btn-icon" 
+                              onClick={() => handleRestockClick(item._id)}
+                              title="Restock"
+                            >
+                              <MdAdd size={18} />
+                            </button>
+                            <div className="item-menu-container">
+                              <button 
+                                className="btn btn-secondary btn-icon" 
+                                onClick={() => setActiveItemMenu(activeItemMenu === item._id ? null : item._id)}
+                                title="More options"
+                              >
+                                <MdMoreVert size={18} />
+                              </button>
+                              {activeItemMenu === item._id && (
+                                <div className="dropdown-menu">
+                                  <button
+                                    onClick={() => {
+                                      handleEditItem(item._id);
+                                      setActiveItemMenu(null);
+                                    }}
+                                    className="dropdown-menu-item"
+                                  >
+                                    <MdEdit size={18} />
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      handleGenerateItemLabel(item._id);
+                                      setActiveItemMenu(null);
+                                    }}
+                                    className="dropdown-menu-item"
+                                  >
+                                    <MdPrint size={18} />
+                                    Print Label
+                                  </button>
+                                  <div className="dropdown-menu-divider" />
+                                  <button
+                                    onClick={() => {
+                                      handleDeleteItem(item._id);
+                                      setActiveItemMenu(null);
+                                    }}
+                                    className="dropdown-menu-item"
+                                    style={{ color: '#e74c3c' }}
+                                  >
+                                    <MdDelete size={18} />
+                                    Delete
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <button 
+                            className="btn btn-icon btn-primary" 
+                            onClick={() => handleAddToCartClick(item)}
+                            title="Add to cart"
+                            disabled={item.quantity === 0}
+                          >
+                            <MdAddShoppingCart size={20} />
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Pagination Controls */}
       {items.length > 0 && totalPages > 1 && (
@@ -588,16 +732,19 @@ const Items = () => {
             onClick={handlePrevPage}
             disabled={currentPage === 1}
             title="Previous page"
+            aria-label="Previous page"
           >
-            <IoIosArrowBack size={20} />
+            <IoIosArrowBack size={22} />
           </button>
           <div className="pagination-dots">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            {getVisiblePageNumbers().map((page) => (
               <button
                 key={page}
                 className={`pagination-dot ${currentPage === page ? 'active' : ''}`}
                 onClick={() => handlePageChange(page)}
-                title={`Page ${page}`}
+                title={`Page ${page} of ${totalPages}`}
+                aria-label={`Page ${page}`}
+                aria-current={currentPage === page ? 'page' : undefined}
               />
             ))}
           </div>
@@ -606,8 +753,9 @@ const Items = () => {
             onClick={handleNextPage}
             disabled={currentPage === totalPages}
             title="Next page"
+            aria-label="Next page"
           >
-            <IoIosArrowForward size={20} />
+            <IoIosArrowForward size={22} />
           </button>
         </div>
       )}

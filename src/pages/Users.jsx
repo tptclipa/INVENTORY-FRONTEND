@@ -158,10 +158,11 @@ const Users = () => {
   return (
     <div>
       <div className="page-header">
-        <h2>User Management</h2>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button 
-            className="btn-icon-header btn-icon-primary" 
+        <div className="page-header-title-row">
+          <h2>User Management</h2>
+          <button
+            type="button"
+            className="btn-icon-header btn-icon-primary"
             onClick={handleAddUser}
             title="Add User"
           >
@@ -170,7 +171,7 @@ const Users = () => {
         </div>
       </div>
 
-      <div className="dashboard-grid" style={{ marginBottom: '20px' }}>
+      <div className="dashboard-grid users-stats-grid">
         <div className="stat-card">
           <h3>Total Users</h3>
           <p className="stat-value">{users.length}</p>
@@ -185,16 +186,16 @@ const Users = () => {
         </div>
       </div>
 
-      <div className="table-container">
-        <table className="data-table">
+      <div className="table-container users-table-wrap">
+        <table className="data-table users-table">
           <thead>
             <tr>
-              <th>Username</th>
-              <th>Full Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Created Date</th>
-              <th>Actions</th>
+              <th className="users-th-username">Username</th>
+              <th className="users-th-name">Full Name</th>
+              <th className="users-th-email">Email</th>
+              <th className="users-th-role">Role</th>
+              <th className="users-th-date">Created Date</th>
+              <th className="users-th-actions">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -216,18 +217,18 @@ const Users = () => {
             ) : (
               users.map((user) => (
                 <tr key={user._id}>
-                  <td>
+                  <td className="users-td-username">
                     <strong>{user.username}</strong>
                   </td>
-                  <td>{user.name}</td>
-                  <td>{user.email}</td>
-                  <td>
+                  <td className="users-td-name">{user.name}</td>
+                  <td className="users-td-email">{user.email}</td>
+                  <td className="users-td-role">
                     <span className={`badge ${user.role === 'admin' ? 'badge-danger' : 'badge-info'}`}>
                       {user.role.toUpperCase()}
                     </span>
                   </td>
-                  <td>{formatDate(user.createdAt)}</td>
-                  <td>
+                  <td className="users-td-date">{formatDate(user.createdAt)}</td>
+                  <td className="users-td-actions">
                     <div className="action-buttons">
                       <MdEdit
                         size={20}
