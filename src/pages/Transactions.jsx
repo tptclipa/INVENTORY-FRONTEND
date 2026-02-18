@@ -192,7 +192,7 @@ const Transactions = () => {
         <div className="page-header-actions" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
           <button
             type="button"
-            className="btn btn-secondary"
+            className="btn btn-secondary filters-toggle-btn"
             onClick={() => setShowFilters((s) => !s)}
             style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
             aria-expanded={showFilters}
@@ -229,8 +229,7 @@ const Transactions = () => {
         </div>
       </div>
 
-      {showFilters && (
-      <div className="filters">
+      <div className={`filters ${!showFilters ? 'filters-hidden' : ''}`}>
         <select name="type" value={filters.type} onChange={handleFilterChange}>
           <option value="">All Types</option>
           <option value="in">Stock In</option>
@@ -256,7 +255,6 @@ const Transactions = () => {
           Clear
         </button>
       </div>
-      )}
 
       <div className="table-container transactions-table-wrap">
         <table className="data-table transactions-table">

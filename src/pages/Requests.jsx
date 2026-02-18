@@ -3,7 +3,7 @@ import { requestsAPI, risAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/Modal';
 import Toast from '../components/Toast';
-import { MdDescription, MdMenu } from 'react-icons/md';
+import { MdDescription, MdMenu, MdMoreVert } from 'react-icons/md';
 
 const Requests = () => {
   const { isAdmin } = useAuth();
@@ -19,6 +19,7 @@ const Requests = () => {
   const [rejectionReason, setRejectionReason] = useState('');
   const [selectedForBatch, setSelectedForBatch] = useState([]);
   const [showBatchSelect, setShowBatchSelect] = useState(false);
+  const [activeRequestMenu, setActiveRequestMenu] = useState(null);
 
   useEffect(() => {
     loadRequests();
@@ -269,17 +270,54 @@ const Requests = () => {
                         </td>
                       )}
                       <td>{new Date(request.createdAt).toLocaleDateString()}</td>
-                      <td className="action-buttons">
-                        {isAdmin && request.status === 'pending' && (
-                          <>
-                            {request.items && Array.isArray(request.items) && request.items.length > 0 ? (
-                              <>
-                                <button
-                                  className="btn btn-action-outline"
-                                  onClick={() => handleViewCart(request)}
-                                >
-                                  View Cart
-                                </button>
+                      <td className={`action-buttons requests-action-cell ${activeRequestMenu === request._id ? 'menu-active' : ''}`}>
+                        <div className="requests-actions-desktop">
+                          {isAdmin && request.status === 'pending' && (
+                            <>
+                              {request.items && Array.isArray(request.items) && request.items.length > 0 ? (
+                                <>
+                                  <button
+                                    className="btn btn-action-outline"
+                                    onClick={() => handleViewCart(request)}
+                                  >
+                                    View Cart
+                                  </button>
+                                  <button
+                                    className="btn btn-icon btn-action-outline"
+                                    onClick={() => handleViewQuantities(request)}
+                                    title="View Item Details"
+                                  >
+                                    <MdMenu size={18} />
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <button
+                                    className="btn btn-action"
+                                    onClick={() => handleApprove(request._id)}
+                                  >
+                                    Approve
+                                  </button>
+                                  <button
+                                    className="btn btn-action-outline"
+                                    onClick={() => handleRejectClick(request)}
+                                  >
+                                    Reject
+                                  </button>
+                                </>
+                              )}
+                            </>
+                          )}
+                          {(request.status === 'approved' || request.status === 'rejected') && (
+                            <>
+                              <button
+                                className="btn btn-icon btn-action-outline"
+                                onClick={() => handleGenerateRIS(request._id)}
+                                title="Download RIS Document"
+                              >
+                                <MdDescription size={18} />
+                              </button>
+                              {hasMultipleItems && (
                                 <button
                                   className="btn btn-icon btn-action-outline"
                                   onClick={() => handleViewQuantities(request)}
@@ -287,88 +325,179 @@ const Requests = () => {
                                 >
                                   <MdMenu size={18} />
                                 </button>
-                              </>
-                            ) : (
-                              <>
+                              )}
+                            </>
+                          )}
+                          {!isAdmin && request.status === 'pending' && (
+                            <>
+                              <button
+                                className="btn btn-action-outline"
+                                onClick={() => handleDelete(request._id)}
+                              >
+                                Cancel
+                              </button>
+                              {hasMultipleItems && (
                                 <button
-                                  className="btn btn-action"
-                                  onClick={() => handleApprove(request._id)}
+                                  className="btn btn-icon btn-action-outline"
+                                  onClick={() => handleViewQuantities(request)}
+                                  title="View Item Details"
                                 >
-                                  Approve
+                                  <MdMenu size={18} />
                                 </button>
+                              )}
+                            </>
+                          )}
+                          {request.status === 'rejected' && request.rejectionReason && (
+                            <>
+                              <button
+                                className="btn btn-action-outline"
+                                onClick={() => {
+                                  setToast({
+                                    message: `Rejection reason: ${request.rejectionReason}`,
+                                    type: 'info'
+                                  });
+                                }}
+                              >
+                                View Reason
+                              </button>
+                              {hasMultipleItems && (
                                 <button
-                                  className="btn btn-action-outline"
-                                  onClick={() => handleRejectClick(request)}
+                                  className="btn btn-icon btn-action-outline"
+                                  onClick={() => handleViewQuantities(request)}
+                                  title="View Item Details"
                                 >
-                                  Reject
+                                  <MdMenu size={18} />
                                 </button>
-                              </>
-                            )}
-                          </>
-                        )}
-                        {(request.status === 'approved' || request.status === 'rejected') && (
-                          <>
-                            <button
-                              className="btn btn-icon btn-action-outline"
-                              onClick={() => handleGenerateRIS(request._id)}
-                              title="Download RIS Document"
-                            >
-                              <MdDescription size={18} />
-                            </button>
-                            {hasMultipleItems && (
-                              <button
-                                className="btn btn-icon btn-action-outline"
-                                onClick={() => handleViewQuantities(request)}
-                                title="View Item Details"
-                              >
-                                <MdMenu size={18} />
-                              </button>
-                            )}
-                          </>
-                        )}
-                        {!isAdmin && request.status === 'pending' && (
-                          <>
-                            <button
-                              className="btn btn-action-outline"
-                              onClick={() => handleDelete(request._id)}
-                            >
-                              Cancel
-                            </button>
-                            {hasMultipleItems && (
-                              <button
-                                className="btn btn-icon btn-action-outline"
-                                onClick={() => handleViewQuantities(request)}
-                                title="View Item Details"
-                              >
-                                <MdMenu size={18} />
-                              </button>
-                            )}
-                          </>
-                        )}
-                        {request.status === 'rejected' && request.rejectionReason && (
-                          <>
-                            <button
-                              className="btn btn-action-outline"
-                              onClick={() => {
-                                setToast({
-                                  message: `Rejection reason: ${request.rejectionReason}`,
-                                  type: 'info'
-                                });
-                              }}
-                            >
-                              View Reason
-                            </button>
-                            {hasMultipleItems && (
-                              <button
-                                className="btn btn-icon btn-action-outline"
-                                onClick={() => handleViewQuantities(request)}
-                                title="View Item Details"
-                              >
-                                <MdMenu size={18} />
-                              </button>
-                            )}
-                          </>
-                        )}
+                              )}
+                            </>
+                          )}
+                        </div>
+                        <div className="requests-actions-mobile item-menu-container">
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveRequestMenu(activeRequestMenu === request._id ? null : request._id);
+                            }}
+                            title="Actions"
+                            aria-label="Open actions menu"
+                          >
+                            <MdMoreVert size={20} />
+                          </button>
+                          {activeRequestMenu === request._id && (
+                            <div className="dropdown-menu">
+                              {isAdmin && request.status === 'pending' && (
+                                <>
+                                  {request.items && Array.isArray(request.items) && request.items.length > 0 ? (
+                                    <>
+                                      <button
+                                        type="button"
+                                        className="dropdown-menu-item"
+                                        onClick={() => { handleViewCart(request); setActiveRequestMenu(null); }}
+                                      >
+                                        <MdDescription size={18} />
+                                        View Cart
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="dropdown-menu-item"
+                                        onClick={() => { handleViewQuantities(request); setActiveRequestMenu(null); }}
+                                      >
+                                        <MdMenu size={18} />
+                                        View Item Details
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <button
+                                        type="button"
+                                        className="dropdown-menu-item"
+                                        onClick={() => { handleApprove(request._id); setActiveRequestMenu(null); }}
+                                      >
+                                        Approve
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="dropdown-menu-item"
+                                        onClick={() => { handleRejectClick(request); setActiveRequestMenu(null); }}
+                                      >
+                                        Reject
+                                      </button>
+                                    </>
+                                  )}
+                                </>
+                              )}
+                              {(request.status === 'approved' || request.status === 'rejected') && (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="dropdown-menu-item"
+                                    onClick={() => { handleGenerateRIS(request._id); setActiveRequestMenu(null); }}
+                                  >
+                                    <MdDescription size={18} />
+                                    Download RIS
+                                  </button>
+                                  {hasMultipleItems && (
+                                    <button
+                                      type="button"
+                                      className="dropdown-menu-item"
+                                      onClick={() => { handleViewQuantities(request); setActiveRequestMenu(null); }}
+                                    >
+                                      <MdMenu size={18} />
+                                      View Item Details
+                                    </button>
+                                  )}
+                                </>
+                              )}
+                              {!isAdmin && request.status === 'pending' && (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="dropdown-menu-item"
+                                    onClick={() => { handleDelete(request._id); setActiveRequestMenu(null); }}
+                                  >
+                                    Cancel
+                                  </button>
+                                  {hasMultipleItems && (
+                                    <button
+                                      type="button"
+                                      className="dropdown-menu-item"
+                                      onClick={() => { handleViewQuantities(request); setActiveRequestMenu(null); }}
+                                    >
+                                      <MdMenu size={18} />
+                                      View Item Details
+                                    </button>
+                                  )}
+                                </>
+                              )}
+                              {request.status === 'rejected' && request.rejectionReason && (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="dropdown-menu-item"
+                                    onClick={() => {
+                                      setToast({ message: `Rejection reason: ${request.rejectionReason}`, type: 'info' });
+                                      setActiveRequestMenu(null);
+                                    }}
+                                  >
+                                    View Reason
+                                  </button>
+                                  {hasMultipleItems && (
+                                    <button
+                                      type="button"
+                                      className="dropdown-menu-item"
+                                      onClick={() => { handleViewQuantities(request); setActiveRequestMenu(null); }}
+                                    >
+                                      <MdMenu size={18} />
+                                      View Item Details
+                                    </button>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   </>
@@ -522,42 +651,44 @@ const Requests = () => {
           onClose={() => setIsQuantityModalOpen(false)}
           title="Quantity Details"
         >
-          <div style={{ marginBottom: '20px' }}>
-            <p><strong>Total Items:</strong> {selectedRequest.items?.length || 0}</p>
-            <p><strong>Date:</strong> {new Date(selectedRequest.createdAt).toLocaleDateString()}</p>
-          </div>
+          <div className="quantity-details-content">
+            <div style={{ marginBottom: '20px' }}>
+              <p><strong>Total Items:</strong> {selectedRequest.items?.length || 0}</p>
+              <p><strong>Date:</strong> {new Date(selectedRequest.createdAt).toLocaleDateString()}</p>
+            </div>
 
-          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead style={{ position: 'sticky', top: 0, backgroundColor: 'var(--bg-primary)', zIndex: 1 }}>
-                <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
-                  <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: '600' }}>Item Name</th>
-                  <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: '600' }}>Stock No.</th>
-                  <th style={{ textAlign: 'right', padding: '12px 8px', fontWeight: '600' }}>Quantity</th>
-                </tr>
-              </thead>
-              <tbody>
-                {selectedRequest.items && selectedRequest.items.map((reqItem, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                    <td style={{ padding: '12px 8px', color: 'var(--text-primary)' }}>{reqItem.item?.name || 'N/A'}</td>
-                    <td style={{ padding: '12px 8px' }} className="text-muted">{reqItem.item?.sku || 'N/A'}</td>
-                    <td style={{ padding: '12px 8px', color: 'var(--text-primary)', textAlign: 'right' }}>
-                      <strong>{reqItem.quantity || 0}</strong> {reqItem.unit || 'pcs'}
-                    </td>
+            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead style={{ position: 'sticky', top: 0, backgroundColor: 'var(--bg-primary)', zIndex: 1 }}>
+                  <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
+                    <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: '600' }}>Item Name</th>
+                    <th style={{ textAlign: 'left', padding: '12px 8px', fontWeight: '600' }}>Stock No.</th>
+                    <th style={{ textAlign: 'right', padding: '12px 8px', fontWeight: '600' }}>Quantity</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {selectedRequest.items && selectedRequest.items.map((reqItem, idx) => (
+                    <tr key={idx} style={{ borderBottom: '1px solid var(--border-light)' }}>
+                      <td style={{ padding: '12px 8px', color: 'var(--text-primary)' }}>{reqItem.item?.name || 'N/A'}</td>
+                      <td style={{ padding: '12px 8px' }} className="text-muted">{reqItem.item?.sku || 'N/A'}</td>
+                      <td style={{ padding: '12px 8px', color: 'var(--text-primary)', textAlign: 'right' }}>
+                        <strong>{reqItem.quantity || 0}</strong> {reqItem.unit || 'pcs'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-          <div className="form-actions" style={{ marginTop: '20px' }}>
-            <button 
-              type="button" 
-              className="btn btn-action-outline" 
-              onClick={() => setIsQuantityModalOpen(false)}
-            >
-              Close
-            </button>
+            <div className="form-actions" style={{ marginTop: '20px' }}>
+              <button 
+                type="button" 
+                className="btn btn-action-outline" 
+                onClick={() => setIsQuantityModalOpen(false)}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </Modal>
       )}

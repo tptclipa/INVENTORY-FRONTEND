@@ -4,12 +4,12 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
 import { LiaCopyright } from 'react-icons/lia';
-import { MdDashboard, MdInventory, MdCategory, MdSwapHoriz, MdAssignment, MdShoppingCart, MdDarkMode, MdLightMode, MdPeople, MdHistory, MdAccountCircle, MdMenu } from 'react-icons/md';
+import { MdDashboard, MdInventory, MdCategory, MdSwapHoriz, MdAssignment, MdShoppingCart, MdDarkMode, MdLightMode, MdBrightnessAuto, MdPeople, MdHistory, MdAccountCircle, MdMenu } from 'react-icons/md';
 
 const Layout = ({ children }) => {
   const { user, logout, isAdmin } = useAuth();
   const { getCartTotal } = useCart();
-  const { isDarkMode, toggleTheme } = useTheme();
+  const { themeMode, cycleTheme, isDarkMode, themes } = useTheme();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -114,9 +114,15 @@ const Layout = ({ children }) => {
             <MdAccountCircle size={20} />
             <span>My Profile</span>
           </Link>
-          <button onClick={toggleTheme} className="sidebar-theme-btn">
-            {isDarkMode ? <MdLightMode size={20} /> : <MdDarkMode size={20} />}
-            <span>{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
+          <button onClick={cycleTheme} className="sidebar-theme-btn" title={`Theme: ${themeMode} (click to cycle)`} aria-label={`Theme: ${themeMode}`}>
+            {themeMode === themes.LIGHT && <MdLightMode size={20} />}
+            {themeMode === themes.DARK && <MdDarkMode size={20} />}
+            {themeMode === themes.SYSTEM && <MdBrightnessAuto size={20} />}
+            <span>
+              {themeMode === themes.LIGHT && 'Light'}
+              {themeMode === themes.DARK && 'Dark'}
+              {themeMode === themes.SYSTEM && (isDarkMode ? 'System (Dark)' : 'System (Light)')}
+            </span>
           </button>
           <Link to="/admin" className="footer-link-sidebar">
             <LiaCopyright size={16} />
@@ -143,7 +149,7 @@ const Layout = ({ children }) => {
             className="app-top-banner-logo"
           />
         </div>
-        <main className="main-content-sidebar">
+        <main className={`main-content-sidebar${location.pathname === '/activity-logs' ? ' main-content-sidebar--activity-logs' : ''}`}>
           {children}
         </main>
       </div>

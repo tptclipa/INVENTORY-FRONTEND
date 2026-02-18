@@ -102,9 +102,12 @@ const ActivityLogs = () => {
     }
   };
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleString();
+  const formatDatePart = (dateString) => {
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const formatTimePart = (dateString) => {
+    return new Date(dateString).toLocaleTimeString();
   };
 
   const formatAction = (action) => {
@@ -176,7 +179,7 @@ const ActivityLogs = () => {
   };
 
   return (
-    <div>
+    <div className="activity-logs-page">
       <div className="page-header">
         <h2>{isAdmin ? 'Activity Logs' : 'My Activity Logs'}</h2>
         <div style={{ display: 'flex', gap: '10px' }}>
@@ -287,7 +290,10 @@ const ActivityLogs = () => {
             ) : (
               currentLogs.map((log) => (
                 <tr key={log._id}>
-                  <td className="activity-logs-td-date">{formatDate(log.createdAt)}</td>
+                  <td className="activity-logs-td-date">
+                    <span className="activity-logs-date-part">{formatDatePart(log.createdAt)}</span>
+                    <span className="activity-logs-time-part">{formatTimePart(log.createdAt)}</span>
+                  </td>
                   {isAdmin && (
                     <td className="activity-logs-td-user">
                       <strong>{log.user?.username || 'Unknown'}</strong>
