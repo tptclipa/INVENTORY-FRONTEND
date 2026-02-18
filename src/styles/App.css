@@ -1873,6 +1873,15 @@ body {
   background: var(--table-hover);
 }
 
+/* Transactions: expandable details row and mobile-only icon (hidden on desktop) */
+.transaction-details-row {
+  display: none;
+}
+
+.transactions-table .mobile-only-expand {
+  display: none;
+}
+
 .text-center {
   text-align: center;
 }
@@ -2338,11 +2347,19 @@ td.action-buttons.menu-active {
   }
 
   .welcome-greeting {
-    font-size: 24px;
+    font-size: 20px;
   }
 
   .welcome-subtitle {
-    font-size: 14px;
+    font-size: 13px;
+  }
+
+  .date-part {
+    font-size: 12px;
+  }
+
+  .time-part {
+    font-size: 20px;
   }
 
   .datetime-display {
@@ -2358,13 +2375,25 @@ td.action-buttons.menu-active {
     padding: 16px;
   }
 
+  .stat-card h3 {
+    font-size: 12px;
+  }
+
   .stat-value {
-    font-size: 26px;
+    font-size: 22px;
+  }
+
+  .stat-card-cta {
+    font-size: 12px;
   }
 
   .stat-card-icon {
     width: 42px;
     height: 42px;
+  }
+
+  .section h3 {
+    font-size: 15px;
   }
 
   .stat-card-icon svg {
@@ -2439,10 +2468,42 @@ td.action-buttons.menu-active {
     border-radius: 12px;
   }
 
+  .welcome-greeting {
+    font-size: 17px;
+  }
+
+  .welcome-subtitle {
+    font-size: 12px;
+  }
+
+  .date-part {
+    font-size: 11px;
+  }
+
+  .time-part {
+    font-size: 17px;
+  }
+
   .dashboard-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     margin-bottom: 20px;
+  }
+
+  .stat-card h3 {
+    font-size: 11px;
+  }
+
+  .stat-value {
+    font-size: 20px;
+  }
+
+  .stat-card-cta {
+    font-size: 11px;
+  }
+
+  .section h3 {
+    font-size: 14px;
   }
 
   /* User Management: compact stat cards on mobile */
@@ -2485,6 +2546,73 @@ td.action-buttons.menu-active {
   /* Table: scroll hint on narrow viewports */
   .table-container {
     box-shadow: inset -12px 0 12px -8px var(--shadow);
+  }
+
+  /* Transactions page: show only Date, Item, Type on mobile; details expand on tap */
+  .transactions-table .mobile-hide-th,
+  .transactions-table .mobile-hide-col {
+    display: none !important;
+  }
+
+  .transactions-table .transaction-main-row {
+    cursor: pointer;
+  }
+
+  .transactions-table .transaction-type-cell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .transactions-table .mobile-only-expand {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: var(--text-secondary);
+  }
+
+  .transactions-table .mobile-only-expand.icon-rotated {
+    transform: rotate(180deg);
+  }
+
+  .transactions-table .transaction-details-row {
+    display: none;
+  }
+
+  .transactions-table .transaction-details-row.expanded {
+    display: table-row;
+  }
+
+  .transactions-table .transaction-details-cell {
+    padding: 0 15px 12px 15px;
+    vertical-align: top;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .transactions-table .transaction-details-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0;
+    background: transparent;
+    font-size: 14px;
+  }
+
+  .transactions-table .transaction-detail-item {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .transactions-table .transaction-detail-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 100px;
+  }
+
+  .transactions-table .transaction-detail-value {
+    color: var(--text-primary);
   }
 
   .page-header {
@@ -2573,6 +2701,22 @@ td.action-buttons.menu-active {
     border-radius: 10px;
   }
 
+  .welcome-greeting {
+    font-size: 15px;
+  }
+
+  .welcome-subtitle {
+    font-size: 11px;
+  }
+
+  .date-part {
+    font-size: 10px;
+  }
+
+  .time-part {
+    font-size: 15px;
+  }
+
   .dashboard-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
@@ -2583,8 +2727,20 @@ td.action-buttons.menu-active {
     padding: 14px 12px;
   }
 
+  .stat-card h3 {
+    font-size: 10px;
+  }
+
   .stat-value {
-    font-size: 24px;
+    font-size: 18px;
+  }
+
+  .stat-card-cta {
+    font-size: 10px;
+  }
+
+  .section h3 {
+    font-size: 13px;
   }
 
   .stat-card-icon {
