@@ -8,6 +8,7 @@ const Users = () => {
   const [users, setUsers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [toast, setToast] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -65,7 +66,13 @@ const Users = () => {
     setIsModalOpen(true);
   };
 
+  const handleRowClick = (user) => {
+    setSelectedUser(user);
+    setIsDetailsModalOpen(true);
+  };
+
   const handleEditUser = (user) => {
+    setIsDetailsModalOpen(false);
     setSelectedUser(user);
     setFormData({
       name: user.name,
@@ -78,6 +85,7 @@ const Users = () => {
   };
 
   const handleChangePassword = (user) => {
+    setIsDetailsModalOpen(false);
     setSelectedUser(user);
     setPasswordData({
       newPassword: '',
@@ -143,6 +151,7 @@ const Users = () => {
 
     try {
       await usersAPI.delete(userId);
+      setIsDetailsModalOpen(false);
       setToast({ message: 'User deleted successfully', type: 'success' });
       loadUsers();
     } catch (error) {
@@ -216,8 +225,12 @@ const Users = () => {
               </tr>
             ) : (
               users.map((user) => (
-                <tr key={user._id}>
-                  <td className="users-td-username">
+                <tr
+                  key={user._id}
+                  className="users-table-row-clickable"
+                  onClick={() => window.innerWidth <= 768 && handleRowClick(user)}
+                >
+                  <td className="users-td-username" title={user.username}>
                     <strong>{user.username}</strong>
                   </td>
                   <td className="users-td-name">{user.name}</td>
@@ -228,7 +241,7 @@ const Users = () => {
                     </span>
                   </td>
                   <td className="users-td-date">{formatDate(user.createdAt)}</td>
-                  <td className="users-td-actions">
+                  <td className="users-td-actions" onClick={(e) => e.stopPropagation()}>
                     <div className="action-buttons">
                       <MdEdit
                         size={20}
@@ -259,6 +272,66 @@ const Users = () => {
           </tbody>
         </table>
       </div>
+
+      {/* User Details Modal (opens when a row is clicked, especially on mobile) */}
+      {selectedUser && (
+        <Modal
+          isOpen={isDetailsModalOpen}
+          onClose={() => setIsDetailsModalOpen(false)}
+          title="Details"
+        >
+          <div className="user-details-modal-content">
+            <div className="user-details-fields">
+              <div className="user-details-field">
+                <span className="user-details-label">Name</span>
+                <span className="user-details-value">{selectedUser.name}</span>
+              </div>
+              <div className="user-details-field">
+                <span className="user-details-label">Username</span>
+                <span className="user-details-value">{selectedUser.username}</span>
+              </div>
+              <div className="user-details-field">
+                <span className="user-details-label">Email</span>
+                <span className="user-details-value">{selectedUser.email}</span>
+              </div>
+              <div className="user-details-field">
+                <span className="user-details-label">Role</span>
+                <span className="user-details-value">{selectedUser.role.toUpperCase()}</span>
+              </div>
+              <div className="user-details-field">
+                <span className="user-details-label">Date Created</span>
+                <span className="user-details-value">{formatDate(selectedUser.createdAt)}</span>
+              </div>
+            </div>
+            <div className="user-details-actions">
+              <button
+                type="button"
+                className="btn-icon-detail"
+                onClick={() => handleEditUser(selectedUser)}
+                title="Edit"
+              >
+                <MdEdit size={24} />
+              </button>
+              <button
+                type="button"
+                className="btn-icon-detail btn-icon-detail-password"
+                onClick={() => handleChangePassword(selectedUser)}
+                title="Change Password"
+              >
+                <MdLock size={24} />
+              </button>
+              <button
+                type="button"
+                className="btn-icon-detail btn-icon-detail-delete"
+                onClick={() => handleDelete(selectedUser._id, selectedUser.username)}
+                title="Delete"
+              >
+                <MdDelete size={24} />
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       {/* Add/Edit User Modal */}
       <Modal

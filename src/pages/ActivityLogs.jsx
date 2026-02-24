@@ -237,21 +237,25 @@ const ActivityLogs = () => {
               </select>
             )}
 
-            <input
-              type="date"
-              name="startDate"
-              value={filters.startDate}
-              onChange={handleFilterChange}
-              placeholder="Start Date"
-            />
+            <label className="activity-logs-date-label">
+              <span className="activity-logs-date-label-text">Start Date</span>
+              <input
+                type="date"
+                name="startDate"
+                value={filters.startDate}
+                onChange={handleFilterChange}
+              />
+            </label>
 
-            <input
-              type="date"
-              name="endDate"
-              value={filters.endDate}
-              onChange={handleFilterChange}
-              placeholder="End Date"
-            />
+            <label className="activity-logs-date-label">
+              <span className="activity-logs-date-label-text">End Date</span>
+              <input
+                type="date"
+                name="endDate"
+                value={filters.endDate}
+                onChange={handleFilterChange}
+              />
+            </label>
 
             <button type="button" className="btn btn-secondary" onClick={handleClearFilters}>
               <MdClear size={18} style={{ verticalAlign: 'middle', marginRight: '4px' }} />

@@ -1574,6 +1574,18 @@ body {
   justify-content: flex-end;
 }
 
+/* Categories table: same column color for Name and Actions */
+.categories-page .categories-table tbody td {
+  background: var(--bg-secondary);
+}
+.categories-page .categories-table tbody tr:hover td {
+  background: var(--table-hover);
+}
+.categories-page .categories-table thead th:first-child,
+.categories-page .categories-table tbody td:first-child {
+  box-shadow: none;
+}
+
 .categories-page .pagination-container-categories {
   border-top: 1px solid var(--border-color);
   flex-wrap: wrap;
@@ -1593,7 +1605,7 @@ body {
   width: 48px;
   height: 48px;
   padding: 0;
-  border-radius: 50%;
+  border-radius: 8px;
 }
 
 .categories-page .categories-filters input {
@@ -1681,6 +1693,14 @@ body {
 
 .activity-logs-filters-panel .filters {
   margin-bottom: 0;
+}
+
+.activity-logs-date-label {
+  display: inline-flex;
+}
+
+.activity-logs-date-label-text {
+  display: none; /* visible on mobile only */
 }
 
 /* Items page: search and filters on one row (desktop) */
@@ -1790,6 +1810,9 @@ body {
   min-width: 100px;
   max-width: 140px;
   padding: 10px 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .users-table .users-th-name,
@@ -2075,12 +2098,12 @@ td.action-buttons.menu-active {
 }
 
 .btn-icon-primary {
-  background: var(--primary);
-  color: white;
+  background: var(--primary-blue, #003A99);
+  color: var(--accent-white, #fff);
 }
 
 .btn-icon-primary:hover {
-  background: #1e40af;
+  background: var(--primary-blue-dark, #1e40af);
 }
 
 .btn-icon-secondary {
@@ -2197,6 +2220,79 @@ td.action-buttons.menu-active {
   color: var(--primary-blue);
 }
 
+/* User Details modal (popup when a user row is clicked, e.g. on mobile) */
+.user-details-modal-content {
+  min-width: 0;
+}
+
+.user-details-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.user-details-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-details-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.user-details-value {
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.user-details-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-color);
+}
+
+.btn-icon-detail {
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.btn-icon-detail:hover {
+  background: var(--border-color);
+}
+
+.btn-icon-detail-password {
+  color: #d97706;
+}
+
+.btn-icon-detail-password:hover {
+  background: rgba(217, 119, 6, 0.15);
+}
+
+.btn-icon-detail-delete {
+  color: #b91c1c;
+}
+
+.btn-icon-detail-delete:hover {
+  background: rgba(185, 28, 28, 0.15);
+}
+
 /* Quantity Details modal: smaller font sizes (mobile only) - see @media (max-width: 768px) */
 
 .form-actions {
@@ -2265,6 +2361,17 @@ td.action-buttons.menu-active {
   gap: 5px;
 }
 
+/* Login page footer: no white container, white text on blue background */
+.login-page .footer {
+  background: transparent;
+  box-shadow: none;
+}
+
+.login-page .footer p,
+.login-page .footer-link {
+  color: #fff;
+}
+
 .footer-link {
   text-decoration: none;
   color: inherit;
@@ -2281,13 +2388,15 @@ td.action-buttons.menu-active {
   transform: translateY(0);
 }
 
-.login-page .footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+/* Stick footer to bottom on desktop only; on mobile it flows with content */
+@media (min-width: 993px) {
+  .login-page .footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: transparent;
+  }
 }
 
 /* Mobile navigation: hamburger + overlay (992px and below) */
@@ -2524,6 +2633,29 @@ td.action-buttons.menu-active {
     padding: 10px;
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
+  }
+
+  /* Categories page: hide Description and Created At columns on mobile */
+  .categories-page .categories-table .categories-th-description,
+  .categories-page .categories-table .categories-td-description,
+  .categories-page .categories-table .categories-th-created,
+  .categories-page .categories-table .categories-td-created {
+    display: none !important;
+  }
+
+  /* Categories page: compact table on mobile – do not separate NAME and ACTIONS */
+  .categories-page .categories-table th,
+  .categories-page .categories-table td {
+    padding: 10px 8px;
+    border-left: none;
+  }
+  .categories-page .categories-table .td-actions.action-buttons {
+    gap: 6px;
+    padding-left: 4px;
+  }
+  .categories-page .categories-table .td-actions .btn-icon {
+    min-width: 40px;
+    padding: 8px;
   }
 
   .dashboard-welcome-card {
@@ -2894,6 +3026,7 @@ td.action-buttons.menu-active {
   }
 
   .activity-logs-page .activity-logs-filters-panel .filters select,
+  .activity-logs-page .activity-logs-filters-panel .filters .activity-logs-date-label,
   .activity-logs-page .activity-logs-filters-panel .filters input[type="date"] {
     width: 100% !important;
     min-width: 0 !important;
@@ -2908,19 +3041,45 @@ td.action-buttons.menu-active {
     min-height: 44px !important;
   }
 
+  /* Date filter labels: visible on mobile for Activity Logs and Transactions */
+  .filters .activity-logs-date-label {
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+  }
+
+  .filters .activity-logs-date-label-text {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary, #666);
+    white-space: nowrap;
+  }
+
   .activity-logs-page .activity-logs-filters-panel .filters button {
     flex: 0 0 auto;
   }
 
-  /* Requests page: hide inline action buttons, show 3-dot menu on mobile */
-  .requests-action-cell .requests-actions-desktop {
+  /* Requests page: mobile – hide Date & Actions columns, show expanded row, clickable rows */
+  .requests-table .requests-table-col-date,
+  .requests-table .requests-table-col-actions {
     display: none !important;
   }
+  .requests-actions-row {
+    display: table-row;
+  }
+  .data-table.requests-table tbody tr:not(.requests-actions-row) {
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
 
-  .requests-action-cell .requests-actions-mobile {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
+  .requests-tap-hint {
+    display: inline-block;
+    margin-top: 4px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: normal;
   }
 
   .page-header {
@@ -2934,6 +3093,10 @@ td.action-buttons.menu-active {
     flex-wrap: wrap;
     width: 100%;
     justify-content: flex-end;
+  }
+
+  .page-header > div.page-header-title-row {
+    justify-content: flex-start;
   }
 
   .page-header-actions .btn,
@@ -2985,6 +3148,100 @@ td.action-buttons.menu-active {
     max-height: 85vh;
     padding: 16px;
     margin: 16px auto;
+  }
+
+  /* User table: on mobile fit viewport, no horizontal scroll */
+  .users-table-wrap {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
+  .users-table {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .users-table thead,
+  .users-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  /* User table: on mobile show only Full Name and Role */
+  .users-table .users-th-username,
+  .users-table .users-td-username,
+  .users-table .users-th-email,
+  .users-table .users-td-email,
+  .users-table .users-th-date,
+  .users-table .users-td-date,
+  .users-table .users-th-actions,
+  .users-table .users-td-actions {
+    display: none !important;
+  }
+
+  /* Mobile: Role, Full Name (Username column removed) – fix spacing so names don’t wrap */
+  .users-table thead tr,
+  .users-table tbody tr {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .users-table .users-th-role,
+  .users-table .users-td-role {
+    flex: 0 0 auto;
+    min-width: 70px;
+    max-width: 150px;
+    width: 150px;
+    order: 1;
+    padding: 10px 8px 10px 12px;
+    box-sizing: border-box;
+  }
+
+  .users-table .users-th-name,
+  .users-table .users-td-name {
+    flex: 1 1 0%;
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+    order: 2;
+    padding: 10px 12px 10px 8px;
+    box-sizing: border-box;
+  }
+
+  /* User table: row click opens details modal on mobile only */
+  .users-table-row-clickable {
+    cursor: pointer;
+  }
+
+  .users-table-row-clickable:hover {
+    background: var(--table-hover);
+  }
+
+  /* User Details modal: mobile-friendly spacing and touch targets */
+  .user-details-fields {
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .user-details-value {
+    font-size: 16px;
+  }
+
+  .user-details-actions {
+    gap: 16px;
+    padding-top: 16px;
+  }
+
+  .btn-icon-detail {
+    min-width: 48px;
+    min-height: 48px;
+    padding: 14px;
+  }
+
+  .btn-icon-detail svg {
+    width: 24px;
+    height: 24px;
   }
 
   /* Toast: bottom full-width on mobile */
@@ -3137,11 +3394,99 @@ td.action-buttons.menu-active {
 
 .dropdown-menu-header {
   padding: 8px 15px;
-  background-color: var(--bg-tertiary);
+  background-color: var(--bg-primary);
   font-weight: bold;
   font-size: 12px;
   color: var(--text-muted);
   transition: all 0.3s ease;
+}
+
+/* Requests page: extra details (Date, Status) at top of Action dropdown */
+.dropdown-menu-details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 10px 15px;
+  font-size: 12px;
+  color: var(--text-muted);
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-light);
+}
+.dropdown-menu-details strong {
+  margin-right: 4px;
+  color: var(--text-primary);
+}
+
+/* Requests page: desktop – hide expanded row (mobile-only); desktop uses Actions column */
+@media (min-width: 769px) {
+  .requests-actions-row {
+    display: none;
+  }
+
+  /* Actions column: left-align so button groups line up across rows */
+  .requests-table .requests-table-col-actions.requests-action-cell {
+    justify-content: flex-start;
+  }
+
+  .requests-actions-desktop {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .requests-actions-desktop .btn {
+    margin: 0;
+    flex-shrink: 0;
+  }
+}
+
+/* "Tap for details" hint – show only on mobile (overridden in @media) */
+.requests-tap-hint {
+  display: none;
+}
+
+.requests-actions-row td {
+  padding: 0;
+  vertical-align: top;
+  border-top: 1px solid var(--border-light);
+  background-color: var(--bg-primary);
+}
+
+.requests-row-actions {
+  display: flex;
+  flex-direction: column;
+}
+
+.requests-row-actions .dropdown-menu-details {
+  border-radius: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  align-items: center;
+  position: center;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.requests-row-actions-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  align-items: center;
+  position: center;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  align-items: center;
+  background-color: var(--bg-primary);
 }
 
 .dropdown-menu-item {
@@ -3190,11 +3535,6 @@ td.action-buttons.menu-active {
   z-index: 9999;
   min-width: 180px;
   transition: all 0.2s ease;
-}
-
-/* Requests page: desktop shows inline actions; mobile shows 3-dot menu */
-.requests-actions-mobile {
-  display: none;
 }
 
 /* Low Stock Row Highlight */
@@ -3528,11 +3868,12 @@ td.action-buttons.menu-active {
 }
 
 .dark-mode .login-page .footer {
-  background: rgba(255, 255, 255, 0.95);
+  background: transparent;
 }
 
-.dark-mode .login-page .footer p {
-  color: var(--primary-blue);
+.dark-mode .login-page .footer p,
+.dark-mode .login-page .footer-link {
+  color: #fff;
 }
 
 /* Pagination Styles */
@@ -3544,6 +3885,13 @@ td.action-buttons.menu-active {
   margin-top: 30px;
   padding: 20px 0;
   flex-wrap: nowrap;
+}
+
+.pagination-container-transactions .pagination-info {
+  order: 1;
+}
+.pagination-container-transactions .pagination-controls {
+  order: 2;
 }
 
 .pagination-arrow {

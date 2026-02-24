@@ -192,8 +192,8 @@ const Categories = () => {
           <thead>
             <tr>
               <th>Name</th>
-              <th>Description</th>
-              <th>Created At</th>
+              <th className="categories-th-description">Description</th>
+              <th className="categories-th-created">Created At</th>
               <th className="th-actions">Actions</th>
             </tr>
           </thead>
@@ -214,8 +214,8 @@ const Categories = () => {
               currentCategories.map((category) => (
                 <tr key={category._id}>
                   <td>{category.name}</td>
-                  <td>{category.description || 'N/A'}</td>
-                  <td>{formatDate(category.createdAt)}</td>
+                  <td className="categories-td-description">{category.description || 'N/A'}</td>
+                  <td className="categories-td-created">{formatDate(category.createdAt)}</td>
                   <td className="action-buttons td-actions">
                     {isAdmin ? (
                       <>

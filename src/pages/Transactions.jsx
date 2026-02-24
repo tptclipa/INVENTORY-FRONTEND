@@ -3,7 +3,7 @@ import { transactionsAPI, itemsAPI, documentsAPI, excelAPI } from '../services/a
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/Modal';
 import Toast from '../components/Toast';
-import { MdFileDownload, MdTableChart, MdFilterList, MdExpandLess, MdExpandMore } from 'react-icons/md';
+import { MdFileDownload, MdTableChart, MdFilterList, MdExpandLess, MdExpandMore, MdAdd } from 'react-icons/md';
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 
 const Transactions = () => {
@@ -119,10 +119,19 @@ const Transactions = () => {
     setCurrentPage(1);
   };
 
-  const getVisiblePageNumbers = () => {
-    if (totalPages <= 3) return Array.from({ length: totalPages }, (_, i) => i + 1);
-    const startPage = Math.max(1, Math.min(currentPage - 1, totalPages - 2));
-    return [startPage, startPage + 1, startPage + 2].filter((p) => p <= totalPages);
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxPagesToShow = 3;
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      let startPage = Math.max(1, currentPage - 1);
+      let endPage = Math.min(totalPages, currentPage + 1);
+      if (currentPage === 1) endPage = 3;
+      else if (currentPage === totalPages) startPage = totalPages - 2;
+      for (let i = startPage; i <= endPage; i++) pages.push(i);
+    }
+    return pages;
   };
 
   const handlePageChange = (pageNumber) => {
@@ -206,7 +215,7 @@ const Transactions = () => {
           </button>
           {isAdmin && (
             <>
-              <button 
+              {/* <button 
                 className="btn btn-secondary" 
                 onClick={handleGenerateTransactionReport}
                 style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
@@ -220,9 +229,9 @@ const Transactions = () => {
               >
                 <MdTableChart size={18} />
                 Excel Export
-              </button>
+              </button> */}
               <button className="btn btn-primary" onClick={handleAddTransaction}>
-                New Transaction
+                <MdAdd size={20} />
               </button>
             </>
           )}
@@ -236,21 +245,24 @@ const Transactions = () => {
           <option value="out">Stock Out</option>
           <option value="rejected">Rejected</option>
         </select>
-        <input
-          type="date"
-          name="startDate"
-          value={filters.startDate}
-          onChange={handleFilterChange}
-        />
-        <input
-          type="date"
-          name="endDate"
-          value={filters.endDate}
-          onChange={handleFilterChange}
-        />
-        <button className="btn btn-secondary" onClick={handleFilter}>
-          Filter
-        </button>
+        <label className="activity-logs-date-label">
+          <span className="activity-logs-date-label-text">Start Date</span>
+          <input
+            type="date"
+            name="startDate"
+            value={filters.startDate}
+            onChange={handleFilterChange}
+          />
+        </label>
+        <label className="activity-logs-date-label">
+          <span className="activity-logs-date-label-text">End Date</span>
+          <input
+            type="date"
+            name="endDate"
+            value={filters.endDate}
+            onChange={handleFilterChange}
+          />
+        </label>  
         <button className="btn btn-secondary" onClick={handleClearFilters}>
           Clear
         </button>
@@ -350,41 +362,45 @@ const Transactions = () => {
 
       {/* Pagination */}
       {totalCount > 0 && totalPages > 1 && (
-        <div className="pagination-container">
+        <div className="pagination-container pagination-container-transactions">
           <span className="pagination-info" style={{ marginRight: 'auto' }}>
             Showing {((currentPage - 1) * pageSize) + 1}–{Math.min(currentPage * pageSize, totalCount)} of {totalCount}
           </span>
-          <button
-            className="pagination-arrow"
-            onClick={handlePrevPage}
-            disabled={currentPage === 1}
-            title="Previous page"
-            aria-label="Previous page"
-          >
-            <IoIosArrowBack size={22} />
-          </button>
-          <div className="pagination-dots">
-            {getVisiblePageNumbers().map((page) => (
+          <div className="pagination-controls">
+            <button
+              type="button"
+              className="pagination-btn arrow"
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
+              title="Previous page"
+              aria-label="Previous page"
+            >
+              <IoIosArrowBack size={22} />
+            </button>
+            {getPageNumbers().map((page) => (
               <button
                 key={page}
                 type="button"
-                className={`pagination-dot ${currentPage === page ? 'active' : ''}`}
+                className={`pagination-btn ${currentPage === page ? 'active' : ''}`}
                 onClick={() => handlePageChange(page)}
-                title={`Page ${page} of ${totalPages}`}
+                title={`Page ${page}`}
                 aria-label={`Page ${page}`}
                 aria-current={currentPage === page ? 'page' : undefined}
-              />
+              >
+                {page}
+              </button>
             ))}
+            <button
+              type="button"
+              className="pagination-btn arrow"
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              title="Next page"
+              aria-label="Next page"
+            >
+              <IoIosArrowForward size={22} />
+            </button>
           </div>
-          <button
-            className="pagination-arrow"
-            onClick={handleNextPage}
-            disabled={currentPage === totalPages}
-            title="Next page"
-            aria-label="Next page"
-          >
-            <IoIosArrowForward size={22} />
-          </button>
         </div>
       )}
 

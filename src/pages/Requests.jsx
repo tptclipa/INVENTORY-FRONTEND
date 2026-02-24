@@ -3,7 +3,7 @@ import { requestsAPI, risAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/Modal';
 import Toast from '../components/Toast';
-import { MdDescription, MdMenu, MdMoreVert } from 'react-icons/md';
+import { MdDescription, MdMenu, MdShoppingCart } from 'react-icons/md';
 
 const Requests = () => {
   const { isAdmin } = useAuth();
@@ -19,7 +19,7 @@ const Requests = () => {
   const [rejectionReason, setRejectionReason] = useState('');
   const [selectedForBatch, setSelectedForBatch] = useState([]);
   const [showBatchSelect, setShowBatchSelect] = useState(false);
-  const [activeRequestMenu, setActiveRequestMenu] = useState(null);
+  const [expandedRequestId, setExpandedRequestId] = useState(null);
 
   useEffect(() => {
     loadRequests();
@@ -207,15 +207,15 @@ const Requests = () => {
       )}
 
       <div className="table-container">
-        <table className="data-table">
+        <table className="data-table requests-table">
           <thead>
             <tr>
               {showBatchSelect && <th style={{ width: '50px' }}>Select</th>}
               <th>Item</th>
               <th>Purpose</th>
               {isAdmin && <th>Requested By</th>}
-              <th>Date</th>
-              <th>Actions</th>
+              <th className="requests-table-col-date">Date</th>
+              <th className="requests-table-col-actions">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -231,7 +231,7 @@ const Requests = () => {
                 const getItemName = () => {
                   try {
                     if (request.items && Array.isArray(request.items) && request.items.length > 0) {
-                      return `${request.items.length} items`;
+                      return `${request.items.length}`;
                     }
                     return request.item?.name || 'N/A';
                   } catch (e) {
@@ -241,11 +241,23 @@ const Requests = () => {
 
                 const hasMultipleItems = request.items && Array.isArray(request.items) && request.items.length > 0;
 
+                const isExpanded = expandedRequestId === request._id;
+                const colSpanActions = (showBatchSelect ? 1 : 0) + 1 + 1 + (isAdmin ? 1 : 0) + 1 + 1;
+
                 return (
                   <>
-                    <tr key={request._id}>
+                    <tr
+                      key={request._id}
+                      className={isExpanded ? 'requests-row-expanded' : ''}
+                      onClick={() => setExpandedRequestId(prev => prev === request._id ? null : request._id)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpandedRequestId(prev => prev === request._id ? null : request._id); } }}
+                      aria-expanded={isExpanded}
+                      aria-label={isExpanded ? 'Collapse request details' : 'Expand request details'}
+                    >
                       {showBatchSelect && (
-                        <td style={{ textAlign: 'center' }}>
+                        <td style={{ textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
                           {(request.status === 'approved' || request.status === 'rejected') ? (
                             <input
                               type="checkbox"
@@ -260,6 +272,7 @@ const Requests = () => {
                         <div>
                           <strong>{getItemName()}</strong>
                           {request.item?.sku && <div className="text-muted">{request.item.sku}</div>}
+                          <span className="requests-tap-hint" aria-hidden="true">Tap for details</span>
                         </div>
                       </td>
                       <td>{request.purpose}</td>
@@ -269,159 +282,77 @@ const Requests = () => {
                           <div className="text-muted">{request.requestedBy?.email || ''}</div>
                         </td>
                       )}
-                      <td>{new Date(request.createdAt).toLocaleDateString()}</td>
-                      <td className={`action-buttons requests-action-cell ${activeRequestMenu === request._id ? 'menu-active' : ''}`}>
+                      <td className="requests-table-col-date">{new Date(request.createdAt).toLocaleDateString()}</td>
+                      <td className="requests-table-col-actions action-buttons requests-action-cell" onClick={(e) => e.stopPropagation()}>
                         <div className="requests-actions-desktop">
                           {isAdmin && request.status === 'pending' && (
                             <>
                               {request.items && Array.isArray(request.items) && request.items.length > 0 ? (
                                 <>
-                                  <button
-                                    className="btn btn-action-outline"
-                                    onClick={() => handleViewCart(request)}
-                                  >
-                                    View Cart
-                                  </button>
-                                  <button
-                                    className="btn btn-icon btn-action-outline"
-                                    onClick={() => handleViewQuantities(request)}
-                                    title="View Item Details"
-                                  >
-                                    <MdMenu size={18} />
-                                  </button>
+                                  <button className="btn btn-icon btn-action-outline" onClick={() => handleViewCart(request)} title="View Cart"><MdShoppingCart size={18} /></button>
+                                  <button className="btn btn-icon btn-action-outline" onClick={() => handleViewQuantities(request)} title="View Item Details"><MdMenu size={18} /></button>
                                 </>
                               ) : (
                                 <>
-                                  <button
-                                    className="btn btn-action"
-                                    onClick={() => handleApprove(request._id)}
-                                  >
-                                    Approve
-                                  </button>
-                                  <button
-                                    className="btn btn-action-outline"
-                                    onClick={() => handleRejectClick(request)}
-                                  >
-                                    Reject
-                                  </button>
+                                  <button className="btn btn-action" onClick={() => handleApprove(request._id)}>Approve</button>
+                                  <button className="btn btn-action-outline" onClick={() => handleRejectClick(request)}>Reject</button>
                                 </>
                               )}
                             </>
                           )}
                           {(request.status === 'approved' || request.status === 'rejected') && (
                             <>
-                              <button
-                                className="btn btn-icon btn-action-outline"
-                                onClick={() => handleGenerateRIS(request._id)}
-                                title="Download RIS Document"
-                              >
-                                <MdDescription size={18} />
-                              </button>
+                              <button className="btn btn-icon btn-action-outline" onClick={() => handleGenerateRIS(request._id)} title="Download RIS Document"><MdDescription size={18} /></button>
                               {hasMultipleItems && (
-                                <button
-                                  className="btn btn-icon btn-action-outline"
-                                  onClick={() => handleViewQuantities(request)}
-                                  title="View Item Details"
-                                >
-                                  <MdMenu size={18} />
-                                </button>
+                                <button className="btn btn-icon btn-action-outline" onClick={() => handleViewQuantities(request)} title="View Item Details"><MdMenu size={18} /></button>
                               )}
                             </>
                           )}
                           {!isAdmin && request.status === 'pending' && (
                             <>
-                              <button
-                                className="btn btn-action-outline"
-                                onClick={() => handleDelete(request._id)}
-                              >
-                                Cancel
-                              </button>
+                              <button className="btn btn-action-outline" onClick={() => handleDelete(request._id)}>Cancel</button>
                               {hasMultipleItems && (
-                                <button
-                                  className="btn btn-icon btn-action-outline"
-                                  onClick={() => handleViewQuantities(request)}
-                                  title="View Item Details"
-                                >
-                                  <MdMenu size={18} />
-                                </button>
+                                <button className="btn btn-icon btn-action-outline" onClick={() => handleViewQuantities(request)} title="View Item Details"><MdMenu size={18} /></button>
                               )}
                             </>
                           )}
                           {request.status === 'rejected' && request.rejectionReason && (
                             <>
-                              <button
-                                className="btn btn-action-outline"
-                                onClick={() => {
-                                  setToast({
-                                    message: `Rejection reason: ${request.rejectionReason}`,
-                                    type: 'info'
-                                  });
-                                }}
-                              >
-                                View Reason
-                              </button>
+                              <button className="btn btn-action-outline" onClick={() => setToast({ message: `Rejection reason: ${request.rejectionReason}`, type: 'info' })}>View Reason</button>
                               {hasMultipleItems && (
-                                <button
-                                  className="btn btn-icon btn-action-outline"
-                                  onClick={() => handleViewQuantities(request)}
-                                  title="View Item Details"
-                                >
-                                  <MdMenu size={18} />
-                                </button>
+                                <button className="btn btn-icon btn-action-outline" onClick={() => handleViewQuantities(request)} title="View Item Details"><MdMenu size={18} /></button>
                               )}
                             </>
                           )}
                         </div>
-                        <div className="requests-actions-mobile item-menu-container">
-                          <button
-                            type="button"
-                            className="btn btn-secondary btn-icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setActiveRequestMenu(activeRequestMenu === request._id ? null : request._id);
-                            }}
-                            title="Actions"
-                            aria-label="Open actions menu"
-                          >
-                            <MdMoreVert size={20} />
-                          </button>
-                          {activeRequestMenu === request._id && (
-                            <div className="dropdown-menu">
+                      </td>
+                    </tr>
+                    {isExpanded && (
+                      <tr key={`${request._id}-actions`} className="requests-actions-row">
+                        <td colSpan={colSpanActions} onClick={(e) => e.stopPropagation()}>
+                          <div className="requests-row-actions">
+                            <div className="dropdown-menu-details">
+                              <span><strong>Date:</strong> {new Date(request.createdAt).toLocaleDateString()}</span>
+                              <span>{getStatusBadge(request.status)}</span>
+                            </div>
+                            <div className="requests-row-actions-buttons">
                               {isAdmin && request.status === 'pending' && (
                                 <>
                                   {request.items && Array.isArray(request.items) && request.items.length > 0 ? (
                                     <>
-                                      <button
-                                        type="button"
-                                        className="dropdown-menu-item"
-                                        onClick={() => { handleViewCart(request); setActiveRequestMenu(null); }}
-                                      >
-                                        <MdDescription size={18} />
-                                        View Cart
+                                      <button type="button" className="btn btn-icon btn-action-outline" onClick={() => { handleViewCart(request); setExpandedRequestId(null); }} title="View Cart">
+                                        <MdShoppingCart size={18} />
                                       </button>
-                                      <button
-                                        type="button"
-                                        className="dropdown-menu-item"
-                                        onClick={() => { handleViewQuantities(request); setActiveRequestMenu(null); }}
-                                      >
+                                      <button type="button" className="btn btn-icon btn-action-outline" onClick={() => { handleViewQuantities(request); setExpandedRequestId(null); }} title="View Item Details">
                                         <MdMenu size={18} />
-                                        View Item Details
                                       </button>
                                     </>
                                   ) : (
                                     <>
-                                      <button
-                                        type="button"
-                                        className="dropdown-menu-item"
-                                        onClick={() => { handleApprove(request._id); setActiveRequestMenu(null); }}
-                                      >
+                                      <button type="button" className="btn btn-action" onClick={() => { handleApprove(request._id); setExpandedRequestId(null); }}>
                                         Approve
                                       </button>
-                                      <button
-                                        type="button"
-                                        className="dropdown-menu-item"
-                                        onClick={() => { handleRejectClick(request); setActiveRequestMenu(null); }}
-                                      >
+                                      <button type="button" className="btn btn-action-outline" onClick={() => { handleRejectClick(request); setExpandedRequestId(null); }}>
                                         Reject
                                       </button>
                                     </>
@@ -430,76 +361,45 @@ const Requests = () => {
                               )}
                               {(request.status === 'approved' || request.status === 'rejected') && (
                                 <>
-                                  <button
-                                    type="button"
-                                    className="dropdown-menu-item"
-                                    onClick={() => { handleGenerateRIS(request._id); setActiveRequestMenu(null); }}
-                                  >
+                                  <button type="button" className="btn btn-icon btn-action-outline" onClick={() => { handleGenerateRIS(request._id); setExpandedRequestId(null); }} title="Download RIS Document">
                                     <MdDescription size={18} />
-                                    Download RIS
                                   </button>
                                   {hasMultipleItems && (
-                                    <button
-                                      type="button"
-                                      className="dropdown-menu-item"
-                                      onClick={() => { handleViewQuantities(request); setActiveRequestMenu(null); }}
-                                    >
+                                    <button type="button" className="btn btn-icon btn-action-outline" onClick={() => { handleViewQuantities(request); setExpandedRequestId(null); }} title="View Item Details">
                                       <MdMenu size={18} />
-                                      View Item Details
                                     </button>
                                   )}
                                 </>
                               )}
                               {!isAdmin && request.status === 'pending' && (
                                 <>
-                                  <button
-                                    type="button"
-                                    className="dropdown-menu-item"
-                                    onClick={() => { handleDelete(request._id); setActiveRequestMenu(null); }}
-                                  >
+                                  <button type="button" className="btn btn-action-outline" onClick={() => { handleDelete(request._id); setExpandedRequestId(null); }}>
                                     Cancel
                                   </button>
                                   {hasMultipleItems && (
-                                    <button
-                                      type="button"
-                                      className="dropdown-menu-item"
-                                      onClick={() => { handleViewQuantities(request); setActiveRequestMenu(null); }}
-                                    >
+                                    <button type="button" className="btn btn-icon btn-action-outline" onClick={() => { handleViewQuantities(request); setExpandedRequestId(null); }} title="View Item Details">
                                       <MdMenu size={18} />
-                                      View Item Details
                                     </button>
                                   )}
                                 </>
                               )}
                               {request.status === 'rejected' && request.rejectionReason && (
                                 <>
-                                  <button
-                                    type="button"
-                                    className="dropdown-menu-item"
-                                    onClick={() => {
-                                      setToast({ message: `Rejection reason: ${request.rejectionReason}`, type: 'info' });
-                                      setActiveRequestMenu(null);
-                                    }}
-                                  >
+                                  <button type="button" className="btn btn-action-outline" onClick={() => { setToast({ message: `Rejection reason: ${request.rejectionReason}`, type: 'info' }); setExpandedRequestId(null); }}>
                                     View Reason
                                   </button>
                                   {hasMultipleItems && (
-                                    <button
-                                      type="button"
-                                      className="dropdown-menu-item"
-                                      onClick={() => { handleViewQuantities(request); setActiveRequestMenu(null); }}
-                                    >
+                                    <button type="button" className="btn btn-icon btn-action-outline" onClick={() => { handleViewQuantities(request); setExpandedRequestId(null); }} title="View Item Details">
                                       <MdMenu size={18} />
-                                      View Item Details
                                     </button>
                                   )}
                                 </>
                               )}
                             </div>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
                   </>
                 );
               })

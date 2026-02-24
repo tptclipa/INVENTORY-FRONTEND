@@ -407,7 +407,7 @@ const Items = () => {
   return (
     <div className="container">
       <div className="page-header">
-        <h2>{isAdmin ? 'Items Management' : 'View Items'}</h2>
+        <h2>{isAdmin ? 'Item Management' : 'View Items'}</h2>
         <div className="page-header-actions">
           {isMobile && (
             <button
@@ -424,14 +424,14 @@ const Items = () => {
           {isAdmin && (
             <>
               <div className="report-menu-container" style={{ position: 'relative' }}>
-                <button 
+                {/* <button 
                   className="btn btn-secondary" 
                   onClick={() => setShowReportMenu(!showReportMenu)}
                   style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
                 >
                   <MdFileDownload size={20} />
                   Generate Reports
-                </button>
+                </button> */}
                 {showReportMenu && (
                   <div className="dropdown-menu">
                     {/* Word Documents Section */}
@@ -484,8 +484,10 @@ const Items = () => {
                   </div>
                 )}
               </div>
-              <button className="btn btn-primary" onClick={handleAddItem}>
-                Add New Item
+              <button type="button"
+              className="btn btn-primary btn-icon btn-add-category"
+              title="Add New Category" onClick={handleAddItem}>
+              <MdAdd size={20} />
               </button>
             </>
           )}
