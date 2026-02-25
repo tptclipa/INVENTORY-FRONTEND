@@ -179,7 +179,7 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-image: url('/TESDA MAN.png');
+  background-image: url('/karosel1.png');
   background-size: 1920px auto;
   background-position: 0 center;
   background-repeat: repeat-x;
@@ -3826,7 +3826,7 @@ td.action-buttons.menu-active {
 
 .dark-mode .login-page {
   /* Ensure login page stays light even in dark mode */
-  background-image: url('/TESDA MAN.png');
+  background-image: url('/karosel1.png');
   background-size: 1920px auto;
   background-position: 0 center;
   background-repeat: repeat-x;
