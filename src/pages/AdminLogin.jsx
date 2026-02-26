@@ -30,8 +30,8 @@ const AdminLogin = () => {
       
       if (response.success) {
         // Store token and user data
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('user', JSON.stringify(response.user));
+        sessionStorage.setItem('token', response.token);
+        sessionStorage.setItem('user', JSON.stringify(response.user));
         
         // Reload the page to trigger AuthContext to pick up the new user
         window.location.href = '/dashboard';
