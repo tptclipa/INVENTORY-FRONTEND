@@ -66,12 +66,13 @@ const Items = () => {
   const [showReportMenu, setShowReportMenu] = useState(false);
   const [activeItemMenu, setActiveItemMenu] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
   const itemsPerPage = 6;
 
   useEffect(() => {
-    loadItems();
-    loadCategories();
-    setCurrentPage(1); // Reset to page 1 when filters change
+    setCurrentPage(1);
+    setLoading(true);
+    Promise.all([loadItems(), loadCategories()]).finally(() => setLoading(false));
   }, [filters]);
 
   useEffect(() => {
@@ -406,6 +407,13 @@ const Items = () => {
 
   return (
     <div className="container">
+      {loading ? (
+        <div className="loading" role="status" aria-live="polite">
+          <div className="loading-spinner" aria-hidden="true" />
+          <span className="loading-text">Loading items...</span>
+        </div>
+      ) : (
+        <>
       <div className="page-header">
         <h2>{isAdmin ? 'Item Management' : 'View Items'}</h2>
         <div className="page-header-actions">
@@ -1011,6 +1019,9 @@ const Items = () => {
             </div>
           </form>
         </Modal>
+      )}
+
+        </>
       )}
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}

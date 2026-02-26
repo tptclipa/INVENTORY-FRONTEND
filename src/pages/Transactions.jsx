@@ -22,6 +22,7 @@ const Transactions = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [expandedId, setExpandedId] = useState(null);
+  const [loading, setLoading] = useState(true);
   const pageSize = 10;
 
   const toggleExpanded = (id) => {
@@ -43,6 +44,7 @@ const Transactions = () => {
   }, [filters, currentPage]);
 
   const loadTransactions = async () => {
+    setLoading(true);
     try {
       const params = { page: currentPage, limit: pageSize };
       if (filters.type) params.type = filters.type;
@@ -55,6 +57,8 @@ const Transactions = () => {
       setTotalPages(data.totalPages ?? 1);
     } catch (error) {
       setToast({ message: 'Error loading transactions', type: 'error' });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -196,6 +200,13 @@ const Transactions = () => {
 
   return (
     <div className="container">
+      {loading ? (
+        <div className="loading" role="status" aria-live="polite">
+          <div className="loading-spinner" aria-hidden="true" />
+          <span className="loading-text">Loading transactions...</span>
+        </div>
+      ) : (
+        <>
       <div className="page-header">
         <h2>{isAdmin ? 'All Transaction History' : 'My Transaction History'}</h2>
         <div className="page-header-actions" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
@@ -473,6 +484,9 @@ const Transactions = () => {
           </div>
         </form>
       </Modal>
+
+        </>
+      )}
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>

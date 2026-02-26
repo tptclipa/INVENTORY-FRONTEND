@@ -20,12 +20,14 @@ const Requests = () => {
   const [selectedForBatch, setSelectedForBatch] = useState([]);
   const [showBatchSelect, setShowBatchSelect] = useState(false);
   const [expandedRequestId, setExpandedRequestId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadRequests();
   }, [filters]);
 
   const loadRequests = async () => {
+    setLoading(true);
     try {
       const params = {};
       if (filters.status) params.status = filters.status;
@@ -34,6 +36,8 @@ const Requests = () => {
       setRequests(data.data);
     } catch (error) {
       setToast({ message: 'Error loading requests', type: 'error' });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -158,6 +162,13 @@ const Requests = () => {
 
   return (
     <div className="container">
+      {loading ? (
+        <div className="loading" role="status" aria-live="polite">
+          <div className="loading-spinner" aria-hidden="true" />
+          <span className="loading-text">Loading requests...</span>
+        </div>
+      ) : (
+        <>
       <div className="page-header">
         <h2>{isAdmin ? 'Manage Requests' : 'My Requests'}</h2>
       </div>
@@ -591,6 +602,9 @@ const Requests = () => {
             </div>
           </div>
         </Modal>
+      )}
+
+        </>
       )}
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}

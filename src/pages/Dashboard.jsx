@@ -16,6 +16,7 @@ const Dashboard = () => {
   const [lowStockItems, setLowStockItems] = useState([]);
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [toast, setToast] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
 
   useEffect(() => {
@@ -51,6 +52,8 @@ const Dashboard = () => {
       setRecentTransactions(transactionsData.data.slice(0, 5));
     } catch (error) {
       setToast({ message: 'Error loading dashboard data', type: 'error' });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,6 +110,13 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {loading ? (
+        <div className="loading" role="status" aria-live="polite">
+          <div className="loading-spinner" aria-hidden="true" />
+          <span className="loading-text">Loading dashboard...</span>
+        </div>
+      ) : (
+        <>
       <div className="dashboard-grid">
         <div className="stat-card stat-card-items">
           <div className="stat-card-icon" aria-hidden>
@@ -189,6 +199,8 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+        </>
+      )}
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>

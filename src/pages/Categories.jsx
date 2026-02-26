@@ -14,6 +14,7 @@ const Categories = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -24,12 +25,15 @@ const Categories = () => {
   }, []);
 
   const loadCategories = async () => {
+    setLoading(true);
     try {
       const data = await categoriesAPI.getAll();
       setCategories(data.data || []);
       setCurrentPage(1);
     } catch (error) {
       setToast({ message: 'Error loading categories', type: 'error' });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -164,6 +168,13 @@ const Categories = () => {
 
   return (
     <div className="container categories-page">
+      {loading ? (
+        <div className="loading" role="status" aria-live="polite">
+          <div className="loading-spinner" aria-hidden="true" />
+          <span className="loading-text">Loading categories...</span>
+        </div>
+      ) : (
+        <>
       <div className="page-header">
         <h2>Categories Management</h2>
         <button
@@ -341,6 +352,9 @@ const Categories = () => {
           </div>
         </form>
       </Modal>
+
+        </>
+      )}
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
