@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { usersAPI } from '../services/api';
 import Toast from '../components/Toast';
 import { MdPerson, MdLock, MdEmail, MdAccountCircle, MdLogout, MdEdit, MdMoreVert, MdInfo } from 'react-icons/md';
+import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 
 const Profile = () => {
   const { user, logout } = useAuth();
@@ -23,6 +24,8 @@ const Profile = () => {
     confirmPassword: '',
   });
   const [passwordStep, setPasswordStep] = useState('request'); // 'request' | 'verify'
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -57,7 +60,7 @@ const Profile = () => {
       
       // Update user in localStorage
       const updatedUser = { ...user, ...profileData };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+      sessionStorage.setItem('user', JSON.stringify(updatedUser));
       
       setToast({ message: 'Profile updated successfully', type: 'success' });
       setActiveView('info');
@@ -375,29 +378,49 @@ const Profile = () => {
                     </div>
                     <div className="form-group">
                       <label htmlFor="newPassword">New Password *</label>
-                      <input
-                        type="password"
-                        id="newPassword"
-                        name="newPassword"
-                        value={passwordData.newPassword}
-                        onChange={handlePasswordChange}
-                        required
-                        minLength={6}
-                        placeholder="Enter new password (min 6 characters)"
-                      />
+                      <div className="password-input-wrapper">
+                        <input
+                          type={showNewPassword ? 'text' : 'password'}
+                          id="newPassword"
+                          name="newPassword"
+                          value={passwordData.newPassword}
+                          onChange={handlePasswordChange}
+                          required
+                          minLength={6}
+                          placeholder="Enter new password (min 6 characters)"
+                        />
+                        <button
+                          type="button"
+                          className="password-toggle-btn"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          aria-label={showNewPassword ? 'Hide password' : 'Show password'}
+                        >
+                          {showNewPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
+                        </button>
+                      </div>
                     </div>
                     <div className="form-group">
                       <label htmlFor="confirmPassword">Confirm Password *</label>
-                      <input
-                        type="password"
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        value={passwordData.confirmPassword}
-                        onChange={handlePasswordChange}
-                        required
-                        minLength={6}
-                        placeholder="Re-enter new password"
-                      />
+                      <div className="password-input-wrapper">
+                        <input
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          id="confirmPassword"
+                          name="confirmPassword"
+                          value={passwordData.confirmPassword}
+                          onChange={handlePasswordChange}
+                          required
+                          minLength={6}
+                          placeholder="Re-enter new password"
+                        />
+                        <button
+                          type="button"
+                          className="password-toggle-btn"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                        >
+                          {showConfirmPassword ? <AiOutlineEyeInvisible size={20} /> : <AiOutlineEye size={20} />}
+                        </button>
+                      </div>
                     </div>
                     <div className="form-actions">
                       <button type="button" className="btn btn-secondary" onClick={handleCancelPasswordChange} disabled={loading}>
