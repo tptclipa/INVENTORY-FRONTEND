@@ -14,7 +14,7 @@ const api = axios.create({
 // Add token to requests
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -44,8 +44,8 @@ api.interceptors.response.use(
       url.startsWith('/auth/resend-verification');
 
     if (status === 401 && !isAuthEndpoint) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('user');
       window.location.href = '/';
     }
 
@@ -121,7 +121,7 @@ export const documentsAPI = {
   generateInventoryReport: async (params) => {
     const response = await axios.post(`${API_URL}/documents/inventory-report`, params, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Bearer ${sessionStorage.getItem('token')}`,
       },
       responseType: 'blob',
     });
@@ -130,7 +130,7 @@ export const documentsAPI = {
   generateLowStockAlert: async () => {
     const response = await axios.post(`${API_URL}/documents/low-stock-alert`, {}, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Bearer ${sessionStorage.getItem('token')}`,
       },
       responseType: 'blob',
     });
@@ -139,7 +139,7 @@ export const documentsAPI = {
   generateTransactionReport: async (params) => {
     const response = await axios.post(`${API_URL}/documents/transaction-report`, params, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Bearer ${sessionStorage.getItem('token')}`,
       },
       responseType: 'blob',
     });
@@ -148,7 +148,7 @@ export const documentsAPI = {
   generateItemLabel: async (itemId) => {
     const response = await axios.post(`${API_URL}/documents/item-label/${itemId}`, {}, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Bearer ${sessionStorage.getItem('token')}`,
       },
       responseType: 'blob',
     });
@@ -161,7 +161,7 @@ export const excelAPI = {
   exportInventoryReport: async (params) => {
     const response = await axios.post(`${API_URL}/excel/inventory-report`, params, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Bearer ${sessionStorage.getItem('token')}`,
       },
       responseType: 'blob',
     });
@@ -170,7 +170,7 @@ export const excelAPI = {
   exportLowStockAlert: async () => {
     const response = await axios.post(`${API_URL}/excel/low-stock-alert`, {}, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Bearer ${sessionStorage.getItem('token')}`,
       },
       responseType: 'blob',
     });
@@ -179,7 +179,7 @@ export const excelAPI = {
   exportTransactionReport: async (params) => {
     const response = await axios.post(`${API_URL}/excel/transaction-report`, params, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Bearer ${sessionStorage.getItem('token')}`,
       },
       responseType: 'blob',
     });
@@ -188,7 +188,7 @@ export const excelAPI = {
   exportFullData: async () => {
     const response = await axios.post(`${API_URL}/excel/full-export`, {}, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Bearer ${sessionStorage.getItem('token')}`,
       },
       responseType: 'blob',
     });
@@ -208,7 +208,7 @@ export const risAPI = {
   generateRIS: async (requestId) => {
     const response = await axios.post(`${API_URL}/ris/generate/${requestId}`, {}, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Bearer ${sessionStorage.getItem('token')}`,
       },
       responseType: 'blob',
     });
@@ -219,7 +219,7 @@ export const risAPI = {
       { requestIds }, 
       {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${sessionStorage.getItem('token')}`,
         },
         responseType: 'blob',
       }
@@ -229,7 +229,7 @@ export const risAPI = {
   generateCustomRIS: async (data) => {
     const response = await axios.post(`${API_URL}/ris/generate-custom`, data, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Bearer ${sessionStorage.getItem('token')}`,
       },
       responseType: 'blob',
     });
@@ -238,7 +238,7 @@ export const risAPI = {
   previewTemplate: async () => {
     const response = await axios.get(`${API_URL}/ris/preview-template`, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Bearer ${sessionStorage.getItem('token')}`,
       },
     });
     return response.data;

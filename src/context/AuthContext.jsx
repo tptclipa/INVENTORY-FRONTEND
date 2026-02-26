@@ -19,8 +19,8 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Check if user is logged in
-    const token = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
+    const token = sessionStorage.getItem('token');
+    const savedUser = sessionStorage.getItem('user');
     
     if (token && savedUser) {
       setUser(JSON.parse(savedUser));
@@ -34,8 +34,8 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.login(credentials);
       const { token, ...userData } = response.data;
       
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(userData));
+      sessionStorage.setItem('token', token);
+      sessionStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
       
       return { success: true };
@@ -68,8 +68,8 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.verifyEmail(email, code);
       const { token, ...userData } = response.data;
       
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(userData));
+      sessionStorage.setItem('token', token);
+      sessionStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
       
       return { success: true };
@@ -123,8 +123,8 @@ export const AuthProvider = ({ children }) => {
       console.error('Error logging out:', error);
     } finally {
       // Clear local storage and user state regardless of API call result
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('user');
       setUser(null);
       setLoggingOut(false);
     }
